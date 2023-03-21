@@ -1,2 +1,6 @@
 builddir/
 build/
+input_data/
+data/
+output_data/
+

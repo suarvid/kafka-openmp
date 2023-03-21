@@ -1,18 +1,18 @@
-project('simple-producer', 'c', 'cpp')
+project('parallel-producer', 'c', 'cpp')
 
 cc = meson.get_compiler('c')
 
-c_args = ['-Wall', '-Wextra', '-g', '-lrdkafka']
+c_args = ['-Wall', '-Wextra', '-Ofast', '-g', '-lrdkafka']
 
 
 inc_dir = include_directories(
 )
 
 sources = files(
-    'main.c',
-    'read_data.c',
-    'kafka_utils.c',
-    'parallel_producer.c'
+    'src/main.c',
+    'src/read_data.c',
+    'src/kafka_utils.c',
+    'src/parallel_producer.c'
 )
 
 kafkadep = dependency('rdkafka')
