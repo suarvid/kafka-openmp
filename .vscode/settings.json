@@ -1,3 +1,8 @@
 {
-    "mesonbuild.configureOnOpen": false
+    "mesonbuild.configureOnOpen": false,
+    "files.associations": {
+        "*.tcc": "c",
+        "string": "c",
+        "streambuf": "c"
+    }
 }
