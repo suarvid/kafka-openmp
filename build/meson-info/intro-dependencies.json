@@ -1,0 +1,1 @@
+[{"name": "rdkafka", "version": "1.8.0", "compile_args": [], "link_args": ["/usr/lib/x86_64-linux-gnu/librdkafka.so"]}]
