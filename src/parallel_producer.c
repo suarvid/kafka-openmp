@@ -79,20 +79,11 @@ void thread_process_data(void *args)
 {
     fprintf(stderr, "Starting thread\n");
     struct thread_args *t_args = (struct thread_args *) args;
-    // args should be a struct with the following fields:
-    // char *buffer
-    // int start_line
-    // int lines_to_read
-    // char *topic
-    // char *broker
-    // char *errstr
-    // int part
-    // might actually need to pass in a producer
-    // or make a producer per thread?
     int message_count = 0;
     char message_buf[MESSAGE_SIZE];
     char *buffer = t_args->buffer;
-    rd_kafka_t *producer = create_producer_basic(t_args->broker);
+    //rd_kafka_t *producer = create_producer_basic(t_args->broker);
+    rd_kafka_t *producer = create_producer_ack_one(t_args->broker);
     while (message_count < t_args->messages_to_read)
     {
         memcpy(message_buf, buffer + (message_count * MESSAGE_SIZE) + t_args->start_point, MESSAGE_SIZE);
