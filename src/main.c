@@ -56,11 +56,15 @@ int main(int argc, char **argv)
     clock_t start;
     clock_t end;
     start = clock();
-    publish_with_n_cores(fp, brokers, topic, n_requested_cores);
+    publish_with_omp(fp, brokers, topic);
+    //publish_with_n_cores(fp, brokers, topic, n_requested_cores);
     end = clock();
 
     double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
 
     printf("Exeuction time: %f seconds.\n", elapsed);
+
+    fclose(fp);
+
     return 0;
 }

@@ -12,3 +12,4 @@ struct thread_args
 };
 
 void publish_with_n_cores(FILE *fp, char *broker, char *topic, int n_cores);
+void publish_with_omp(const FILE *fp, const char *brokers, const char *topic);

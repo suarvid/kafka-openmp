@@ -2,7 +2,8 @@ project('parallel-producer', 'c', 'cpp')
 
 cc = meson.get_compiler('c')
 
-c_args = ['-Wall', '-Wextra', '-Ofast', '-g', '-lrdkafka']
+c_args = ['-Wall', '-Wextra', '-Ofast', '-lrdkafka', '-fopenmp']
+c_args_debug = ['-Wall', '-Wextra', '-g', '-lrdkafka', '-fopenmp']
 
 
 inc_dir = include_directories(
@@ -16,10 +17,13 @@ sources = files(
 )
 
 kafkadep = dependency('rdkafka')
+ompdep = dependency('openmp')
 
-executable('simple-producer',
+dependencies = [kafkadep, ompdep]
+
+executable('parallel-producer',
     sources,
-    c_args: c_args,
+    c_args: c_args_debug,
     include_directories: inc_dir,
-    dependencies: kafkadep
+    dependencies: dependencies
 )
