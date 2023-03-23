@@ -2,6 +2,9 @@
 #include <stdio.h>
 
 #include "producer_builder.h"
+#include "kafka_utils.h"
+
+#define LOG_MS_INTERVAL "20000" // 20 seconds
 
 rd_kafka_t *create_producer_basic(const char *brokers)
 {
@@ -40,6 +43,21 @@ rd_kafka_t *create_producer_high_throughput_all_acks_idemp_enabled_gzip(const ch
     with_compression_gzip(config);
     with_acks_all(config);
     with_idempotence(config);
+
+    rd_kafka_t *producer = create_producer_with_config(config);
+
+    return producer;
+}
+
+rd_kafka_t *create_producer_high_throughput_one_ack_no_idemp_snappy(const char *brokers)
+{
+    rd_kafka_conf_t *config = rd_kafka_conf_new();
+    with_bootstrap_servers(config, brokers);
+    with_queue_buffering_large(config);
+    with_linger_time_long(config);
+    with_batch_size_large(config);
+    with_compression_snappy(config);
+    with_acks_one(config);
 
     rd_kafka_t *producer = create_producer_with_config(config);
 
@@ -142,6 +160,7 @@ rd_kafka_t *create_producer_low_latency_acks_one_no_idemp(const char *brokers)
     with_batch_size_small(config);
     with_compression_none(config);
     with_acks_one(config);
+    with_stats_cb(config, stats_cb);
 
     rd_kafka_t *producer = create_producer_with_config(config);
     return producer;
@@ -156,6 +175,7 @@ rd_kafka_t *create_producer_low_latency_no_acks_no_idemp(const char *brokers)
     with_batch_size_small(config);
     with_compression_none(config);
     without_acks(config);
+    with_stats_cb(config, stats_cb);
 
     rd_kafka_t *producer = create_producer_with_config(config);
     return producer;
@@ -171,6 +191,7 @@ rd_kafka_t *create_producer_low_latency_acks_one_idemp_enabled(const char *broke
     with_compression_none(config);
     with_acks_one(config);
     with_idempotence(config);
+    with_stats_cb(config, stats_cb);
 
     rd_kafka_t *producer = create_producer_with_config(config);
     return producer;
@@ -186,9 +207,15 @@ rd_kafka_t *create_producer_low_latency_acks_all_idemp_enabled(const char *broke
     with_compression_none(config);
     with_acks_all(config);
     with_idempotence(config);
+    with_stats_cb(config, stats_cb);
 
     rd_kafka_t *producer = create_producer_with_config(config);
     return producer;
+}
+
+void with_stats_cb(rd_kafka_conf_t *config, int (*stats_cb)(rd_kafka_t *rk, char *json, size_t json_len, void *opaque))
+{
+    rd_kafka_conf_set_stats_cb(config, stats_cb);
 }
 
 void with_idempotence(rd_kafka_conf_t *config)
@@ -421,8 +448,22 @@ void with_bootstrap_servers(rd_kafka_conf_t *config, char *brokers)
     }
 }
 
+void with_logging_interval_ms(rd_kafka_conf_t *config)
+{
+    char errstr[512];
+
+    if (rd_kafka_conf_set(config, "statistics.interval.ms", LOG_MS_INTERVAL, errstr, sizeof(errstr)) != RD_KAFKA_CONF_OK)
+    {
+        fprintf(stderr, "%s\n", errstr);
+        exit(EXIT_FAILURE);
+    }
+}
+
 rd_kafka_t *create_producer_with_config(rd_kafka_conf_t *config)
 {
+
+    with_logging_interval_ms(config);
+
     char errstr[512];
     rd_kafka_t *producer = rd_kafka_new(RD_KAFKA_PRODUCER, config, errstr, sizeof(errstr));
     if (!producer)

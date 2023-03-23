@@ -5,7 +5,7 @@
 
 #define VERY_LONG_TIME INT32_MAX
 
-static FILE *stats_fp;
+FILE *stats_fp;
 
 rd_kafka_resp_err_t send_message(rd_kafka_t *producer, const char *topic, char *buf, size_t len)
 {
@@ -119,14 +119,32 @@ static void json_parse_stats(const char *json)
     stats.avg_rtt = avg_rtt[MAX_BROKERS];
 }
 
-static int stats_cb(rd_kafka_t *rk, char *json, size_t json_len, void *opaque)
+int stats_cb(rd_kafka_t *rk, char *json, size_t json_len, void *opaque)
 {
     json_parse_stats(json);
 
-    if (stats_fp)
-    {
-        fprintf(stats_fp, "%s\n", json);
-    }
+    //if (stats_fp)
+    //{
+    //    fprintf(stats_fp, "%s\n", json);
+    //} else {
+    //    fprintf(stderr, "%s\n", json);
+    //}
 
     return 0;
+}
+
+void init_stats_fp()
+{
+    fprintf(stderr, "Initializing stats_fp...\n");
+    stats_fp = fopen("../output_data/stats.json", "w");
+    if (stats_fp == NULL)
+    {
+        fprintf(stderr, "Failed to init stats fp, aborting!\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+void print_stats()
+{
+    fprintf(stderr, "AVERAGE RTT: %f\n", stats.avg_rtt);
 }

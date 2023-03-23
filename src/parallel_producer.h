@@ -31,6 +31,4 @@ struct omp_thread_args_shared_producer
 
 void publish_with_n_cores(FILE *fp, char *broker, char *topic, int n_cores);
 size_t publish_with_omp_private_producer(const FILE *fp, const char *brokers, const char *topic, int n_threads);
-void omp_thread_process_data_private_producer(struct omp_thread_args_private_producer args);
 size_t publish_with_omp_shared_producer(const FILE *fp, const char *brokers, const char *topic, int n_threads);
-void omp_thread_process_data_shared_producer(struct omp_thread_args_shared_producer args);

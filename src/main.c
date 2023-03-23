@@ -60,17 +60,19 @@ int main(int argc, char **argv)
 
     size_t bytes_sent;
 
+    init_stats_fp();
     start = omp_get_wtime();
     bytes_sent = publish_with_omp_shared_producer(fp, brokers, topic, n_requested_cores);
     end = omp_get_wtime();
     elapsed = end - start;
     fprintf(stderr, "Sent %zu bytes in %f seconds with shared producer.\n", bytes_sent, elapsed);
+    print_stats();
 
-    start = omp_get_wtime();
-    bytes_sent = publish_with_omp_private_producer(fp, brokers, topic, n_requested_cores);
-    end = omp_get_wtime();
-    elapsed = end - start;
-    fprintf(stderr, "Sent %zu bytes in %f seconds with private producers.\n", bytes_sent, elapsed);
+    //start = omp_get_wtime();
+    //bytes_sent = publish_with_omp_private_producer(fp, brokers, topic, n_requested_cores);
+    //end = omp_get_wtime();
+    //elapsed = end - start;
+    //fprintf(stderr, "Sent %zu bytes in %f seconds with private producers.\n", bytes_sent, elapsed);
 
     fclose(fp);
 
