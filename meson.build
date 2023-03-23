@@ -13,7 +13,8 @@ sources = files(
     'src/main.c',
     'src/read_data.c',
     'src/kafka_utils.c',
-    'src/parallel_producer.c'
+    'src/parallel_producer.c',
+    'src/producer_builder.c'
 )
 
 kafkadep = dependency('rdkafka')
