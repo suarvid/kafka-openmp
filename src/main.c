@@ -8,6 +8,7 @@
 #include "read_data.h"
 #include "parallel_producer.h"
 #include "kafka_utils.h"
+#include <omp.h>
 
 static volatile sig_atomic_t run = 1;
 
@@ -55,14 +56,16 @@ int main(int argc, char **argv)
 
     clock_t start;
     clock_t end;
-    start = clock();
-    publish_with_omp(fp, brokers, topic);
+    size_t bytes_sent;
+    start = omp_get_wtime();
+    bytes_sent = publish_with_omp(fp, brokers, topic, n_requested_cores);
     //publish_with_n_cores(fp, brokers, topic, n_requested_cores);
-    end = clock();
+    end = omp_get_wtime();
 
-    double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
+    double elapsed = end - start;
+    //double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
 
-    printf("Exeuction time: %f seconds.\n", elapsed);
+    fprintf(stderr, "Sent %zu bytes in %f seconds.\n", bytes_sent, elapsed);
 
     fclose(fp);
 

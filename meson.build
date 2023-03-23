@@ -23,7 +23,7 @@ dependencies = [kafkadep, ompdep]
 
 executable('parallel-producer',
     sources,
-    c_args: c_args_debug,
+    c_args: c_args,
     include_directories: inc_dir,
     dependencies: dependencies
 )

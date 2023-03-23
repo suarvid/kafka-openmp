@@ -48,39 +48,58 @@ void publish_with_n_cores(FILE *fp, char *broker, char *topic, int n_cores)
     free(buffer);
 }
 
-void publish_with_omp(const FILE *fp, const char *brokers, const char *topic)
+size_t publish_with_omp(const FILE *fp, const char *brokers, const char *topic, int n_threads)
 {
     size_t file_size = get_file_size(fp);
     char *buffer = malloc(file_size);
     read_file_contents(fp, buffer, file_size);
 
-    int n_threads = omp_get_num_threads();
     fprintf(stderr, "Using %d threads\n", n_threads);
 
-    rd_kafka_t *producer = create_producer_basic(brokers);
-    fprintf(stderr, "Created producer\n");
-    char send_buffer[MESSAGE_SIZE];
 
-    int i;
-    rd_kafka_resp_err_t err;
-#pragma omp parallel shared(buffer, topic) private(i, producer, send_buffer, err)
-    {
-        for (i = 0; i < file_size - 32; i += MESSAGE_SIZE)
-        {
-            fprintf(stderr, "Calling memcpy\n");
-            memcpy(send_buffer, buffer[i], MESSAGE_SIZE);
-            fprintf(stderr, "In loop iteration %d\n", i);
-            err = send_message(producer, topic, send_buffer, MESSAGE_SIZE);
-            if (err)
-            {
-                fprintf(stderr, "%% Failed to produce to topic %s: %s", topic, rd_kafka_err2str(err));
-            }
-        }
-        flush_destroy_producer(producer);
-    }
-#pragma omp barrier
+    struct omp_thread_args args;
+    args.broker = brokers;
+    args.topic = topic;
+    args.messages_per_thread = file_size / (n_threads * MESSAGE_SIZE);
+    args.buffer = buffer;
+#   pragma omp parallel num_threads(n_threads)
+    omp_thread_process_data(args);
+#   pragma omp barrier
     free(buffer);
+    return file_size;
 }
+
+
+void omp_thread_process_data(struct omp_thread_args args)
+{
+    int my_thread_num = omp_get_thread_num();
+    fprintf(stderr, "Starting data processing on thread %d\n", my_thread_num);
+    int start_point = my_thread_num * args.messages_per_thread;
+    //rd_kafka_t *producer = create_producer_basic(args.broker);
+    //rd_kafka_t *producer = create_producer_high_throughput_no_acks_no_idemp(args.broker);
+    rd_kafka_t *producer = create_producer_high_throughput_no_acks_no_idemp_lz4(args.broker);
+    rd_kafka_resp_err_t err;
+
+    for (int i = 0; i < args.messages_per_thread; i++)
+    {
+        int message_index = start_point + i;
+        char *message = args.buffer + (message_index * MESSAGE_SIZE);
+    send:
+        err = send_message(producer, args.topic, message, MESSAGE_SIZE);
+        if (err)
+        {
+            if (err == RD_KAFKA_RESP_ERR__QUEUE_FULL)
+            {
+                sleep(1);
+                goto send; // B)
+            }
+            fprintf(stderr, "%% Failed to produce to topic %s: %s", args.topic, rd_kafka_err2str(err));
+        }
+    }
+
+    flush_destroy_producer(producer);
+}
+
 
 int get_num_cores()
 {
@@ -123,7 +142,7 @@ void thread_process_data(void *args)
         rd_kafka_resp_err_t err = send_message(producer, t_args->topic, message_buf, MESSAGE_SIZE);
         if (err)
         {
-            fprintf("Failed to send message: %s\n", rd_kafka_err2str(err));
+            fprintf(stderr, "Failed to send message: %s\n", rd_kafka_err2str(err));
         }
         else
         {
