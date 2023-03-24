@@ -9,7 +9,7 @@ struct thread_args
     int start_point;
     int messages_to_read;
     char *topic;
-    char *broker;
+    char *brokers;
 };
 
 struct omp_thread_args_private_producer
@@ -17,7 +17,7 @@ struct omp_thread_args_private_producer
     char *buffer;
     int messages_per_thread;
     char *topic;
-    char *broker;
+    char *brokers;
 };
 
 struct omp_thread_args_shared_producer
@@ -25,7 +25,7 @@ struct omp_thread_args_shared_producer
     char *buffer;
     int messages_per_thread;
     char *topic;
-    char *broker;
+    char *brokers;
     rd_kafka_t *producer;
 };
 

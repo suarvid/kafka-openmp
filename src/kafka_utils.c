@@ -4,8 +4,9 @@
 #include <ctype.h>
 
 #define VERY_LONG_TIME INT32_MAX
+#define MAX_BROKERS 10
 
-FILE *stats_fp;
+static FILE *stats_fp = NULL;
 
 rd_kafka_resp_err_t send_message(rd_kafka_t *producer, const char *topic, char *buf, size_t len)
 {
@@ -23,6 +24,11 @@ rd_kafka_resp_err_t send_message(rd_kafka_t *producer, const char *topic, char *
     return err;
 }
 
+void destroy_producer(rd_kafka_t *producer)
+{
+    rd_kafka_destroy(producer);
+}
+
 void flush_destroy_producer(rd_kafka_t *producer)
 {
 
@@ -36,115 +42,22 @@ void flush_destroy_producer(rd_kafka_t *producer)
     rd_kafka_destroy(producer);
 }
 
-// Should contain all the metrics we care about
-static struct
-{
-    uint64_t avg_rtt;
-} stats;
-
-// Taken from librdkafka example
-static uint64_t json_parse_fields(
-    const char *json,
-    const char **end,
-    const char *field1,
-    const char *field2)
-{
-    const char *t = json;
-    const char *t2;
-    int len1 = (int)strlen(field1);
-    int len2 = (int)strlen(field2);
-
-    while ((t2 = strstr(t, field1)))
-    {
-        uint64_t v;
-
-        t = t2;
-        t += len1;
-
-        // Find field
-        if (!(t2 = strstr(t, field2)))
-        {
-            continue;
-        }
-        t2 += len2;
-
-        while (isspace((int)*t2))
-        {
-            t2++;
-        }
-
-        v = strtoull(t2, (char **)&t, 10);
-        if (t2 == t)
-        {
-            continue;
-        }
-        *end = t;
-        return v;
-    }
-
-    *end = t + strlen(t);
-    return 0;
-}
-
-// Based on librdkafka example
 static void json_parse_stats(const char *json)
 {
-    const char *t;
-#define MAX_BROKERS 10
-    uint64_t avg_rtt[MAX_BROKERS + 1];
-    int avg_rtt_i = 0;
-
-    // Keep the total in the last element
-    avg_rtt[MAX_BROKERS] = 0;
-
-    t = json;
-    while (avg_rtt_i < MAX_BROKERS && *t)
+    if (stats_fp != NULL)
     {
-        avg_rtt[avg_rtt_i] = json_parse_fields(t, &t, "\"rtt\":", "\"avg\":");
-
-        if (avg_rtt[avg_rtt_i] < 100)
-        {
-            continue;
-        }
-
-        avg_rtt[MAX_BROKERS] += avg_rtt[avg_rtt_i];
-        avg_rtt_i++;
+        fprintf(stats_fp, "%s\n", json);
     }
-
-    if (avg_rtt_i > 0)
-    {
-        avg_rtt[MAX_BROKERS] /= avg_rtt_i;
-    }
-
-    stats.avg_rtt = avg_rtt[MAX_BROKERS];
 }
 
 int stats_cb(rd_kafka_t *rk, char *json, size_t json_len, void *opaque)
 {
     json_parse_stats(json);
-
-    //if (stats_fp)
-    //{
-    //    fprintf(stats_fp, "%s\n", json);
-    //} else {
-    //    fprintf(stderr, "%s\n", json);
-    //}
-
     return 0;
 }
 
-void init_stats_fp()
+FILE *init_stats_fp(const char *filename)
 {
-    fprintf(stderr, "Initializing stats_fp...\n");
-    stats_fp = fopen("../output_data/stats.json", "w");
-    if (stats_fp == NULL)
-    {
-        fprintf(stderr, "Failed to init stats fp, aborting!\n");
-        exit(EXIT_FAILURE);
-    }
-}
-
-void print_stats()
-{
-    fprintf(stderr, "AVERAGE RTT: %f\n", stats.avg_rtt);
+    stats_fp = fopen(filename, "w");
+    return stats_fp;
 }

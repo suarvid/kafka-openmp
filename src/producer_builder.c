@@ -4,12 +4,14 @@
 #include "producer_builder.h"
 #include "kafka_utils.h"
 
-#define LOG_MS_INTERVAL "20000" // 20 seconds
+#define LOG_MS_INTERVAL "10000" // 10 seconds
 
 rd_kafka_t *create_producer_basic(const char *brokers)
 {
     rd_kafka_conf_t *config = rd_kafka_conf_new();
     with_bootstrap_servers(config, brokers);
+    with_stats_cb(config, stats_cb);
+
     rd_kafka_t *producer = create_producer_with_config(config);
     return producer;
 }
@@ -19,6 +21,8 @@ rd_kafka_t *create_producer_ack_one(const char *brokers)
     rd_kafka_conf_t *config = rd_kafka_conf_new();
     with_bootstrap_servers(config, brokers);
     with_acks_one(config);
+    with_stats_cb(config, stats_cb);
+
     rd_kafka_t *producer = create_producer_with_config(config);
     return producer;
 }
@@ -28,8 +32,9 @@ rd_kafka_t *create_producer_ack_all(const char *brokers)
     rd_kafka_conf_t *config = rd_kafka_conf_new();
     with_bootstrap_servers(config, brokers);
     with_acks_all(config);
-    rd_kafka_t *producer = create_producer_with_config(config);
+    with_stats_cb(config, stats_cb);
 
+    rd_kafka_t *producer = create_producer_with_config(config);
     return producer;
 }
 
@@ -43,6 +48,7 @@ rd_kafka_t *create_producer_high_throughput_all_acks_idemp_enabled_gzip(const ch
     with_compression_gzip(config);
     with_acks_all(config);
     with_idempotence(config);
+    with_stats_cb(config, stats_cb);
 
     rd_kafka_t *producer = create_producer_with_config(config);
 
@@ -58,6 +64,7 @@ rd_kafka_t *create_producer_high_throughput_one_ack_no_idemp_snappy(const char *
     with_batch_size_large(config);
     with_compression_snappy(config);
     with_acks_one(config);
+    with_stats_cb(config, stats_cb);
 
     rd_kafka_t *producer = create_producer_with_config(config);
 
@@ -74,6 +81,7 @@ rd_kafka_t *create_producer_high_throughput_all_acks_idemp_enabled_snappy(const 
     with_compression_snappy(config);
     with_acks_all(config);
     with_idempotence(config);
+    with_stats_cb(config, stats_cb);
 
     rd_kafka_t *producer = create_producer_with_config(config);
 
@@ -90,6 +98,7 @@ rd_kafka_t *create_producer_high_throughput_all_acks_idemp_enabled_lz4(const cha
     with_compression_lz4(config);
     with_acks_all(config);
     with_idempotence(config);
+    with_stats_cb(config, stats_cb);
 
     rd_kafka_t *producer = create_producer_with_config(config);
 
@@ -106,6 +115,7 @@ rd_kafka_t *create_producer_high_throughput_all_acks_no_idemp_gzip(const char *b
     with_batch_size_large(config);
     with_compression_gzip(config);
     with_acks_all(config);
+    with_stats_cb(config, stats_cb);
 
     rd_kafka_t *producer = create_producer_with_config(config);
     return producer;
@@ -120,6 +130,7 @@ rd_kafka_t *create_producer_high_throughput_no_acks_no_idemp_gzip(const char *br
     with_linger_time_long(config);
     with_batch_size_large(config);
     with_compression_gzip(config);
+    with_stats_cb(config, stats_cb);
 
     rd_kafka_t *producer = create_producer_with_config(config);
     return producer;
@@ -134,6 +145,8 @@ rd_kafka_t *create_producer_high_throughput_no_acks_no_idemp_lz4(const char *bro
     with_linger_time_long(config);
     with_batch_size_large(config);
     with_compression_lz4(config);
+    with_stats_cb(config, stats_cb);
+
     rd_kafka_t *producer = create_producer_with_config(config);
     return producer;
 }
@@ -147,6 +160,8 @@ rd_kafka_t *create_producer_high_throughput_no_acks_no_idemp_snappy(const char *
     with_linger_time_long(config);
     with_batch_size_large(config);
     with_compression_snappy(config);
+    with_stats_cb(config, stats_cb);
+
     rd_kafka_t *producer = create_producer_with_config(config);
     return producer;
 }

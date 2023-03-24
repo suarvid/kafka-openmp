@@ -11,11 +11,13 @@
 #include "parallel_producer.h"
 #include "producer_builder.h"
 
+#define SHORT_SLEEP 100000
+
 int get_num_cores();
 pthread_t *create_threads(int n_threads, void *thread_func(void *), void *args);
 void thread_process_data(void *args);
 
-void publish_with_n_cores(FILE *fp, char *broker, char *topic, int n_cores)
+void publish_with_n_cores(FILE *fp, char *brokers, char *topic, int n_cores)
 {
     int max_cores = get_num_cores();
     if (n_cores > max_cores)
@@ -37,7 +39,7 @@ void publish_with_n_cores(FILE *fp, char *broker, char *topic, int n_cores)
     default_args->buffer = buffer;
     default_args->messages_to_read = messages_per_thread;
     default_args->topic = topic;
-    default_args->broker = broker;
+    default_args->brokers = brokers;
 
     pthread_t *threads = create_threads(n_cores, thread_process_data, default_args);
 
@@ -66,7 +68,7 @@ static void omp_thread_process_data_shared_producer(struct omp_thread_args_share
         {
             if (err == RD_KAFKA_RESP_ERR__QUEUE_FULL)
             {
-                sleep(1);
+                usleep(SHORT_SLEEP);
                 goto send;
             }
             fprintf(stderr, "%% Failed to produce to topic %s: %s", args.topic, rd_kafka_err2str(err));
@@ -84,7 +86,7 @@ size_t publish_with_omp_shared_producer(const FILE *fp, const char *brokers, con
 
 
     struct omp_thread_args_shared_producer args;
-    args.broker = brokers;
+    args.brokers = brokers;
     args.topic = topic;
     args.messages_per_thread = file_size / (n_threads * MESSAGE_SIZE);
     args.buffer = buffer;
@@ -104,8 +106,7 @@ static void omp_thread_process_data_private_producer(struct omp_thread_args_priv
     int my_thread_num = omp_get_thread_num();
     fprintf(stderr, "Starting data processing on thread %d\n", my_thread_num);
     int start_point = my_thread_num * args.messages_per_thread;
-    //rd_kafka_t *producer = create_producer_high_throughput_no_acks_no_idemp_snappy(args.broker);
-    rd_kafka_t *producer = create_producer_low_latency_no_acks_no_idemp(args.broker);
+    rd_kafka_t *producer = create_producer_high_throughput_one_ack_no_idemp_snappy(args.brokers);
     rd_kafka_resp_err_t err;
 
     for (int i = 0; i < args.messages_per_thread; i++)
@@ -118,7 +119,7 @@ static void omp_thread_process_data_private_producer(struct omp_thread_args_priv
         {
             if (err == RD_KAFKA_RESP_ERR__QUEUE_FULL)
             {
-                sleep(1);
+                usleep(SHORT_SLEEP);
                 goto send;
             }
             fprintf(stderr, "%% Failed to produce to topic %s: %s", args.topic, rd_kafka_err2str(err));
@@ -138,7 +139,7 @@ size_t publish_with_omp_private_producer(const FILE *fp, const char *brokers, co
 
 
     struct omp_thread_args_private_producer args;
-    args.broker = brokers;
+    args.brokers = brokers;
     args.topic = topic;
     args.messages_per_thread = file_size / (n_threads * MESSAGE_SIZE);
     args.buffer = buffer;
@@ -187,7 +188,7 @@ void thread_process_data(void *args)
     char message_buf[MESSAGE_SIZE];
     char *buffer = t_args->buffer;
     // rd_kafka_t *producer = create_producer_basic(t_args->broker);
-    rd_kafka_t *producer = create_producer_ack_one(t_args->broker);
+    rd_kafka_t *producer = create_producer_ack_one(t_args->brokers);
     while (message_count < t_args->messages_to_read)
     {
         memcpy(message_buf, buffer + (message_count * MESSAGE_SIZE) + t_args->start_point, MESSAGE_SIZE);
