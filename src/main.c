@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <sys/resource.h>
 
 #include <librdkafka/rdkafka.h>
 #include "read_data.h"
