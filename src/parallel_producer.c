@@ -90,9 +90,7 @@ size_t publish_with_omp_shared_producer(const FILE *fp, const char *brokers, con
     args.topic = topic;
     args.messages_per_thread = file_size / (n_threads * MESSAGE_SIZE);
     args.buffer = buffer;
-    args.producer = create_producer_high_throughput_no_acks_no_idemp_lz4(brokers);
-    //args.producer = create_producer_high_throughput_one_ack_no_idemp_snappy(brokers);
-    //args.producer = create_producer_low_latency_acks_one_no_idemp(brokers);
+    args.producer = create_producer_high_throughput_all_acks_idemp_enabled_lz4(brokers);
 #   pragma omp parallel num_threads(n_threads)
     omp_thread_process_data_shared_producer(args);
 #   pragma omp barrier
@@ -106,7 +104,7 @@ static void omp_thread_process_data_private_producer(struct omp_thread_args_priv
     int my_thread_num = omp_get_thread_num();
     fprintf(stderr, "Starting data processing on thread %d\n", my_thread_num);
     int start_point = my_thread_num * args.messages_per_thread;
-    rd_kafka_t *producer = create_producer_high_throughput_one_ack_no_idemp_snappy(args.brokers);
+    rd_kafka_t *producer = create_producer_high_throughput_all_acks_idemp_enabled_lz4(args.brokers);
     rd_kafka_resp_err_t err;
 
     for (int i = 0; i < args.messages_per_thread; i++)
@@ -126,7 +124,7 @@ static void omp_thread_process_data_private_producer(struct omp_thread_args_priv
         }
     }
 
-    flush_destroy_producer(producer);
+    flush_producer(producer);
 }
 
 size_t publish_with_omp_private_producer(const FILE *fp, const char *brokers, const char *topic, int n_threads)
@@ -135,7 +133,6 @@ size_t publish_with_omp_private_producer(const FILE *fp, const char *brokers, co
     char *buffer = malloc(file_size);
     read_file_contents(fp, buffer, file_size);
 
-    fprintf(stderr, "Using %d threads\n", n_threads);
 
 
     struct omp_thread_args_private_producer args;
@@ -163,7 +160,6 @@ int get_num_cores()
 // and starts them running a specified function with a specified argument
 pthread_t *create_threads(int n_threads, void *thread_func(void *), void *args)
 {
-    fprintf(stderr, "Creating threads\n");
     struct thread_args *default_args = (struct thread_args *)args;
     pthread_t *threads = malloc(sizeof(pthread_t) * n_threads);
     int i;
@@ -182,7 +178,6 @@ pthread_t *create_threads(int n_threads, void *thread_func(void *), void *args)
 
 void thread_process_data(void *args)
 {
-    fprintf(stderr, "Starting thread\n");
     struct thread_args *t_args = (struct thread_args *)args;
     int message_count = 0;
     char message_buf[MESSAGE_SIZE];
@@ -203,5 +198,5 @@ void thread_process_data(void *args)
         }
     }
 
-    flush_destroy_producer(producer);
+    flush_producer(producer);
 }

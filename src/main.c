@@ -11,6 +11,8 @@
 #include "kafka_utils.h"
 #include <omp.h>
 
+#define MEASUREMENTS_PER_RUN 5
+
 static void callback(rd_kafka_t *rk, const rd_kafka_message_t *rkmessage, void *opaque)
 {
     if (rkmessage->err)
@@ -30,7 +32,6 @@ int get_actual_n_cores(int n_requested_cores)
     }
     return n_requested_cores;
 }
-
 
 int main(int argc, char **argv)
 {
@@ -53,7 +54,6 @@ int main(int argc, char **argv)
     actual_cores = get_actual_n_cores(n_requested_cores);
     fprintf(stderr, "Running with %d cores\n", actual_cores);
 
-
     FILE *fp = fopen(input_file, "rb");
 
     if (fp == NULL)
@@ -74,30 +74,42 @@ int main(int argc, char **argv)
     size_t bytes_sent;
     FILE *stats_fp;
 
-    //start = omp_get_wtime();
-    //bytes_sent = publish_with_omp_shared_producer(fp, brokers, topic, n_requested_cores);
-    //end = omp_get_wtime();
-    //elapsed = end - start;
-    //fprintf(stderr, "Sent %zu bytes in %f seconds with shared producer.\n", bytes_sent, elapsed);
-    //print_stats();
+    stats_fp = init_stats_fp("output_data/stats_shared.json");
+    fprintf(stderr, "Running shared producers...\n");
+    for (int i = 0; i < MEASUREMENTS_PER_RUN; i++)
+    {
+        wtime_start = omp_get_wtime();
+        cpu_time_start = clock();
+        bytes_sent = publish_with_omp_shared_producer(fp, brokers, topic, n_requested_cores);
+        wtime_end = omp_get_wtime();
+        cpu_time_end = clock();
+        wtime_elapsed = wtime_end - wtime_start;
+        cpu_time_elapsed = ((double)cpu_time_end - cpu_time_start) / CLOCKS_PER_SEC;
+        cpu_utilization = cpu_time_elapsed / wtime_elapsed;
+        cpu_utilization /= actual_cores;
+        fprintf(stats_fp, "{ \"n_cores\": %d, \"cpu_utilization\": %f, \"seconds_elapsed\": %f, \"bytes_sent\": %zu }\n", actual_cores, cpu_utilization, wtime_elapsed, bytes_sent);
+        sleep(10);
+    }
 
-    stats_fp = init_stats_fp("../output_data/stats.json");
-    wtime_start = omp_get_wtime();
-    cpu_time_start = clock();
-    bytes_sent = publish_with_omp_private_producer(fp, brokers, topic, n_requested_cores);
-    wtime_end = omp_get_wtime();
-    cpu_time_end = clock();
-    wtime_elapsed = wtime_end - wtime_start;
-    cpu_time_elapsed = ((double)cpu_time_end - cpu_time_start)/CLOCKS_PER_SEC;
-    cpu_utilization = cpu_time_elapsed / wtime_elapsed;
-    cpu_utilization /= actual_cores;
-    fprintf(stderr, "CPU TIME: %lf, WALL_TIME: %lf\n", cpu_time_elapsed, wtime_elapsed);
-    fprintf(stderr, "Sent %zu bytes in %f seconds with private producers.\n", bytes_sent, wtime_elapsed);
-    fprintf(stderr, "CPU Usage: %lf\n", cpu_utilization);
-    fprintf(stats_fp, "{ \"n_cores\": %d, \"cpu_utilization\": %f, \"seconds_elapsed\": %f, \"bytes_sent\": %zu }", actual_cores, cpu_utilization, wtime_elapsed, bytes_sent);
+    stats_fp = init_stats_fp("output_data/stats_private.json");
+    fprintf(stderr, "Running private producers...\n");
+    for (int i = 0; i < MEASUREMENTS_PER_RUN; i++)
+    {
+        wtime_start = omp_get_wtime();
+        cpu_time_start = clock();
+        bytes_sent = publish_with_omp_private_producer(fp, brokers, topic, n_requested_cores);
+        wtime_end = omp_get_wtime();
+        cpu_time_end = clock();
+        wtime_elapsed = wtime_end - wtime_start;
+        cpu_time_elapsed = ((double)cpu_time_end - cpu_time_start) / CLOCKS_PER_SEC;
+        cpu_utilization = cpu_time_elapsed / wtime_elapsed;
+        cpu_utilization /= actual_cores;
+        fprintf(stats_fp, "{ \"n_cores\": %d, \"cpu_utilization\": %f, \"seconds_elapsed\": %f, \"bytes_sent\": %zu }\n", actual_cores, cpu_utilization, wtime_elapsed, bytes_sent);
+        sleep(10); // just to give some room for each run
+    }
+
     fclose(fp);
     fclose(stats_fp);
-
 
     return 0;
 }

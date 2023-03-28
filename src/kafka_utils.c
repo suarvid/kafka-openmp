@@ -29,7 +29,7 @@ void destroy_producer(rd_kafka_t *producer)
     rd_kafka_destroy(producer);
 }
 
-void flush_destroy_producer(rd_kafka_t *producer)
+void flush_producer(rd_kafka_t *producer)
 {
 
     fprintf(stderr, "%% Flushing final messages...\n");
@@ -39,7 +39,10 @@ void flush_destroy_producer(rd_kafka_t *producer)
     }
     fprintf(stderr, "%% Flushed final messages.\n");
 
-    rd_kafka_destroy(producer);
+    // Don't destroy producers, adds time which would probably
+    // not be needed otherwise, as destroying producers is rather
+    // rare, not done often
+    //rd_kafka_destroy(producer);
 }
 
 static void json_parse_stats(const char *json)
@@ -59,5 +62,10 @@ int stats_cb(rd_kafka_t *rk, char *json, size_t json_len, void *opaque)
 FILE *init_stats_fp(const char *filename)
 {
     stats_fp = fopen(filename, "w");
+    if (stats_fp == NULL)
+    {
+        fprintf(stderr, "Failed to init stats fp.\n");
+        exit(EXIT_FAILURE);
+    }
     return stats_fp;
 }

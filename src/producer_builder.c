@@ -4,7 +4,7 @@
 #include "producer_builder.h"
 #include "kafka_utils.h"
 
-#define LOG_MS_INTERVAL "10000" // 10 seconds
+#define LOG_MS_INTERVAL "1000" // 1 second
 
 rd_kafka_t *create_producer_basic(const char *brokers)
 {

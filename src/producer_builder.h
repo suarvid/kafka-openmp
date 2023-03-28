@@ -9,6 +9,8 @@ rd_kafka_t *create_producer_high_throughput_no_acks_no_idemp_snappy(const char *
 rd_kafka_t *create_producer_high_throughput_no_acks_no_idemp_gzip(const char *brokers);
 rd_kafka_t *create_producer_high_throughput_no_acks_no_idemp_lz4(const char *brokers);
 rd_kafka_t *create_producer_high_throughput_one_ack_no_idemp_snappy(const char *brokers);
+rd_kafka_t *create_producer_high_throughput_all_acks_idemp_enabled_snappy(const char *brokers);
+rd_kafka_t *create_producer_high_throughput_all_acks_idemp_enabled_lz4(const char *brokers);
 
 // Latency
 rd_kafka_t *create_producer_low_latency_acks_one_no_idemp(const char *brokers);
