@@ -27,17 +27,6 @@ rd_kafka_t *create_producer_ack_one(const char *brokers)
     return producer;
 }
 
-rd_kafka_t *create_producer_ack_all(const char *brokers)
-{
-    rd_kafka_conf_t *config = rd_kafka_conf_new();
-    with_bootstrap_servers(config, brokers);
-    with_acks_all(config);
-    with_stats_cb(config, stats_cb);
-
-    rd_kafka_t *producer = create_producer_with_config(config);
-    return producer;
-}
-
 rd_kafka_t *create_producer_high_throughput_all_acks_idemp_enabled_gzip(const char *brokers)
 {
     rd_kafka_conf_t *config = rd_kafka_conf_new();
@@ -196,21 +185,6 @@ rd_kafka_t *create_producer_low_latency_no_acks_no_idemp(const char *brokers)
     return producer;
 }
 
-rd_kafka_t *create_producer_low_latency_acks_one_idemp_enabled(const char *brokers)
-{
-    rd_kafka_conf_t *config = rd_kafka_conf_new();
-
-    with_bootstrap_servers(config, brokers);
-    with_linger_time_zero(config);
-    with_batch_size_small(config);
-    with_compression_none(config);
-    with_acks_one(config);
-    with_idempotence(config);
-    with_stats_cb(config, stats_cb);
-
-    rd_kafka_t *producer = create_producer_with_config(config);
-    return producer;
-}
 
 rd_kafka_t *create_producer_low_latency_acks_all_idemp_enabled(const char *brokers)
 {
@@ -224,6 +198,48 @@ rd_kafka_t *create_producer_low_latency_acks_all_idemp_enabled(const char *broke
     with_idempotence(config);
     with_stats_cb(config, stats_cb);
 
+    rd_kafka_t *producer = create_producer_with_config(config);
+    return producer;
+}
+
+rd_kafka_t *create_producer_low_latency_no_acks_no_idemp_snappy(const char *brokers)
+{
+    rd_kafka_conf_t *config = rd_kafka_conf_new();
+
+    with_bootstrap_servers(config, brokers);
+    with_linger_time_zero(config);
+    with_batch_size_small(config);
+    with_compression_snappy(config);
+    without_acks(config);
+    with_stats_cb(config, stats_cb);
+    rd_kafka_t *producer = create_producer_with_config(config);
+    return producer;
+}
+
+rd_kafka_t *create_producer_low_latency_no_acks_no_idemp_gzip(const char *brokers)
+{
+    rd_kafka_conf_t *config = rd_kafka_conf_new();
+
+    with_bootstrap_servers(config, brokers);
+    with_linger_time_zero(config);
+    with_batch_size_small(config);
+    with_compression_gzip(config);
+    without_acks(config);
+    with_stats_cb(config, stats_cb);
+    rd_kafka_t *producer = create_producer_with_config(config);
+    return producer;
+}
+
+rd_kafka_t *create_producer_low_latency_no_acks_no_idemp_lz4(const char *brokers)
+{
+    rd_kafka_conf_t *config = rd_kafka_conf_new();
+
+    with_bootstrap_servers(config, brokers);
+    with_linger_time_zero(config);
+    with_batch_size_small(config);
+    with_compression_lz4(config);
+    without_acks(config);
+    with_stats_cb(config, stats_cb);
     rd_kafka_t *producer = create_producer_with_config(config);
     return producer;
 }

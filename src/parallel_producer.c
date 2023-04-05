@@ -90,7 +90,8 @@ size_t publish_with_omp_shared_producer(const FILE *fp, const char *brokers, con
     args.topic = topic;
     args.messages_per_thread = file_size / (n_threads * MESSAGE_SIZE);
     args.buffer = buffer;
-    args.producer = create_producer_high_throughput_all_acks_idemp_enabled_lz4(brokers);
+    args.producer = create_producer_low_latency_no_acks_no_idemp_lz4(brokers);
+
 #   pragma omp parallel num_threads(n_threads)
     omp_thread_process_data_shared_producer(args);
 #   pragma omp barrier
@@ -104,7 +105,7 @@ static void omp_thread_process_data_private_producer(struct omp_thread_args_priv
     int my_thread_num = omp_get_thread_num();
     fprintf(stderr, "Starting data processing on thread %d\n", my_thread_num);
     int start_point = my_thread_num * args.messages_per_thread;
-    rd_kafka_t *producer = create_producer_high_throughput_all_acks_idemp_enabled_lz4(args.brokers);
+    rd_kafka_t *producer = create_producer_low_latency_no_acks_no_idemp_lz4(args.brokers);
     rd_kafka_resp_err_t err;
 
     for (int i = 0; i < args.messages_per_thread; i++)
