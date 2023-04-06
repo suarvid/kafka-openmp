@@ -1,11 +1,7 @@
 #pragma once
 #include <librdkafka/rdkafka.h>
 
-#define MESSAGE_SIZE 32 // Size of each message, in bytes
-#define MESSAGE_SIZE_LARGE 1024 // 1MB
-#define MESSAGE_SIZE_MEDIUM 512
-#define MESSAGE_SIZE_SMALL 256
-#define MESSAGE_SIZE_TINY 128
+#define MESSAGE_SIZE 1024 // Size of each message, in bytes
 
 rd_kafka_t *create_producer_basic(const char *brokers);
 rd_kafka_t *create_producer_ack_one(const char *brokers);

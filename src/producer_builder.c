@@ -4,7 +4,7 @@
 #include "producer_builder.h"
 #include "kafka_utils.h"
 
-#define LOG_MS_INTERVAL "1000" // 1 second
+#define LOG_MS_INTERVAL "2000" // milliseconds
 
 rd_kafka_t *create_producer_basic(const char *brokers)
 {
@@ -109,6 +109,39 @@ rd_kafka_t *create_producer_high_throughput_all_acks_no_idemp_gzip(const char *b
     rd_kafka_t *producer = create_producer_with_config(config);
     return producer;
 }
+
+rd_kafka_t *create_producer_high_throughput_all_acks_no_idemp_snappy(const char *brokers)
+{
+    rd_kafka_conf_t *config = rd_kafka_conf_new();
+
+    with_bootstrap_servers(config, brokers);
+    with_queue_buffering_large(config);
+    with_linger_time_long(config);
+    with_batch_size_large(config);
+    with_compression_snappy(config);
+    with_acks_all(config);
+    with_stats_cb(config, stats_cb);
+
+    rd_kafka_t *producer = create_producer_with_config(config);
+    return producer;
+}
+
+rd_kafka_t *create_producer_high_throughput_all_acks_no_idemp_lz4(const char *brokers)
+{
+    rd_kafka_conf_t *config = rd_kafka_conf_new();
+
+    with_bootstrap_servers(config, brokers);
+    with_queue_buffering_large(config);
+    with_linger_time_long(config);
+    with_batch_size_large(config);
+    with_compression_lz4(config);
+    with_acks_all(config);
+    with_stats_cb(config, stats_cb);
+
+    rd_kafka_t *producer = create_producer_with_config(config);
+    return producer;
+}
+
 
 rd_kafka_t *create_producer_high_throughput_no_acks_no_idemp_gzip(const char *brokers)
 {

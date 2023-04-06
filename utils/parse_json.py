@@ -32,11 +32,6 @@ for line in lines:
         outbuf_latency_min.append(line_values["brokers"][broker_name]["outbuf_latency"]["min"])
         int_latency_stddev_sum += line_values["brokers"][broker_name]["int_latency"]["stddev"]
         outbuf_latency_stddev_sum += line_values["brokers"][broker_name]["outbuf_latency"]["stddev"]
-    if "n_cores" in line:
-        cpu_utilization_sum += line_values["cpu_utilization"]
-        seconds_elapsed += line_values["seconds_elapsed"]
-        bytes_sent += line_values["bytes_sent"]
-        n_cores = line_values["n_cores"]
 
     line_count += 1
 
@@ -60,10 +55,7 @@ output_lines.append("Maximum outbuf latency: {} (ms)\n".format(outbuf_latency_ma
 output_lines.append("Minimum outbuf latency: {} (ms)\n".format(outbuf_latency_min / 1000))
 output_lines.append("Internal latency stddev: {} (ms)\n".format(int_latency_stddev / 1000))
 output_lines.append("Outbuf latency stddev: {} (ms)\n".format(outbuf_latency_stddev / 1000))
-output_lines.append("Average throughput: {} (bytes/s)\n".format(average_throughput))
-output_lines.append("Average CPU utilization: {} (%)\n".format(cpu_utilization_avg))
-output_lines.append("Elapsed time: {} (s)\n".format(seconds_elapsed))
 
-output_file = open(input_file_path, "w")
+output_file = open(input_file_path, "a")
 
 output_file.writelines(output_lines)

@@ -27,8 +27,15 @@ struct omp_thread_args_shared_producer
     char *topic;
     char *brokers;
     rd_kafka_t *producer;
+    char *producer_name;
+    int producer_name_len;
 };
 
-void publish_with_n_cores(FILE *fp, char *broker, char *topic, int n_cores);
-size_t publish_with_omp_private_producer(const FILE *fp, const char *brokers, const char *topic, int n_threads);
-size_t publish_with_omp_shared_producer(const FILE *fp, const char *brokers, const char *topic, int n_threads);
+typedef struct producer_info
+{
+    rd_kafka_t *producer;
+    char *producer_name;
+} producer_info_t;
+
+void publish_parallel_for_shared(size_t file_size, char* buffer, rd_kafka_t *producer, char* topic, int n_cores);
+void publish_parallel_for_private(size_t file_size, char* buffer, producer_info_t **producer_infos, int producer_idx, char* topic, int n_cores);

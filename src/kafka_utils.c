@@ -6,7 +6,7 @@
 #define VERY_LONG_TIME INT32_MAX
 #define MAX_BROKERS 10
 
-static FILE *stats_fp = NULL;
+FILE *stats_fp = NULL;
 
 rd_kafka_resp_err_t send_message(rd_kafka_t *producer, const char *topic, char *buf, size_t len)
 {
