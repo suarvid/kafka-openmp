@@ -2,6 +2,7 @@
 #include <signal.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <time.h>
 #include <sys/resource.h>
 
@@ -13,6 +14,7 @@
 #include <omp.h>
 
 #define MEASUREMENTS_PER_RUN 5
+#define SLEEP_BETWEEN_MEASUREMENTS 20 //seconds
 
 void write_summary_stats(FILE *stats_fp, int cores, double elapsed_avg, size_t file_size);
 
@@ -124,6 +126,7 @@ int main(int argc, char **argv)
             wtime_end = omp_get_wtime();
             wtime_elapsed = wtime_end - wtime_start;
             wtime_elapsed_total += wtime_elapsed;
+            sleep(SLEEP_BETWEEN_MEASUREMENTS);
         }
 
         wtime_elapsed_avg = wtime_elapsed_total / MEASUREMENTS_PER_RUN;
@@ -132,6 +135,8 @@ int main(int argc, char **argv)
         fprintf(stderr, "{ \"n_cores\": %d, \"elapsed_time_avg\": %f, \"bytes_sent\": %zu }\n", actual_cores, wtime_elapsed_avg, input_file_size);
         fclose(stats_fp);
     }
+
+    free(producer_infos);
 
     producer_info_t **private_producer_infos = malloc(sizeof(struct producer_info *));
     for (int thread_num = 0; thread_num < actual_cores; thread_num++)
@@ -157,6 +162,7 @@ int main(int argc, char **argv)
             wtime_end = omp_get_wtime();
             wtime_elapsed = wtime_end - wtime_start;
             wtime_elapsed_total += wtime_elapsed;
+            sleep(SLEEP_BETWEEN_MEASUREMENTS);
         }
 
         wtime_elapsed_avg = wtime_elapsed_total / MEASUREMENTS_PER_RUN;
