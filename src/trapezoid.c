@@ -6,24 +6,41 @@
 
 #include "kafka_utils.h"
 
+#define RIGHT_POINT_TRAPEZOID 100.0
 
-void estimate_integral(double left, double right, int num_trapezoids, rd_kafka_t *producer, const char *topic);
+void estimate_integral(double left, double right, int num_trapezoids, int n_threads, rd_kafka_t *producer, const char *topic);
 
 
-void benchmark_with_trapezoids(int num_threads, rd_kafka_t *producer, const char *topic)
+
+void benchmark_with_trapezoids_private(int n_threads, const char *topic)
 {
     double left = 0.0;
-    double right;
+
+#pragma omp parallel num_threads(n_threads)
+    {
+        rd_kafka_t *producer = create_producer();
+        estimate_integral(left, RIGHT_POINT_TRAPEZOID, 1000, n_threads, producer, topic);
+        //rd_kafka_destroy(producer);
+    }
+
+}
+
+
+void benchmark_with_trapezoids_shared(int n_threads, rd_kafka_t *producer, const char *topic)
+{
+    double left = 0.0;
     
 
-#pragma omp parallel
-    estimate_integral(left, right, 1000, producer, topic);
+#pragma omp parallel num_threads(n_threads)
+    {
+        estimate_integral(left, RIGHT_POINT_TRAPEZOID, 1000, n_threads, producer, topic);
+    }
 
     
 }
 
 // This sends once per thread, so should probably calculate multiple integrals in each test run
-void estimate_integral(double left, double right, int num_trapezoids, rd_kafka_t *producer, const char *topic)
+void estimate_integral(double left, double right, int num_trapezoids, int n_threads, rd_kafka_t *producer, const char *topic)
 {
     
     double trapezoid_base, x, my_result;
@@ -31,10 +48,9 @@ void estimate_integral(double left, double right, int num_trapezoids, rd_kafka_t
     int trapezoids_per_thread;
 
     int my_rank = omp_get_thread_num();
-    int num_threads = omp_get_num_threads();
 
     trapezoid_base = (right-left)/num_trapezoids;
-    trapezoids_per_thread = num_trapezoids/num_threads;
+    trapezoids_per_thread = num_trapezoids/n_threads;
     local_left = left + my_rank*(trapezoid_base*trapezoids_per_thread);
     local_right = local_left + trapezoid_base*trapezoids_per_thread;
 

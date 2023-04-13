@@ -14,7 +14,8 @@ sources = files(
     'src/read_data.c',
     'src/kafka_utils.c',
     'src/parallel_producer.c',
-    'src/producer_builder.c'
+    'src/producer_builder.c',
+    'src/trapezoid.c',
 )
 
 kafkadep = dependency('rdkafka')

@@ -17,6 +17,7 @@
 #define SLEEP_BETWEEN_MEASUREMENTS 20 //seconds
 
 void write_summary_stats(FILE *stats_fp, int cores, double elapsed_avg, size_t file_size);
+void benchmark_binary_data(FILE *input_fp, char *brokers, char *topic, char *stats_fp_base, int actual_cores);
 
 int get_actual_n_cores(int n_requested_cores)
 {
@@ -91,6 +92,21 @@ int main(int argc, char **argv)
         fprintf(stderr, "Failed to open input file %s\n", input_file);
     }
 
+    benchmark_binary_data(input_fp, brokers, topic, stats_fp_base, actual_cores);
+
+    return EXIT_SUCCESS;
+}
+
+void write_summary_stats(FILE *stats_fp, int cores, double elapsed_avg, size_t file_size)
+{
+    fprintf(stats_fp, "{ \"n_cores\": %d, \"elapsed_time_avg\": %f, \"bytes_sent\": %zu }\n", cores, elapsed_avg, file_size);
+    fflush(stats_fp);
+}
+
+
+void benchmark_binary_data(FILE *input_fp, char *brokers, char *topic, char *stats_fp_base, int actual_cores)
+{
+
     FILE *stats_fp;
     size_t input_file_size = get_file_size(input_fp);
     char *input_file_buffer = malloc(input_file_size);
@@ -113,7 +129,7 @@ int main(int argc, char **argv)
     {
         curr_producer_info = producer_infos[i];
         // Shared
-        sprintf(curr_stats_fp_path, "%s%s_%s_cores_shared.json", stats_fp_base, curr_producer_info.producer_name, actual_cores_str);
+        sprintf(curr_stats_fp_path, "%s%s_%d_cores_shared.json", stats_fp_base, curr_producer_info.producer_name, actual_cores);
         stats_fp = init_stats_fp(curr_stats_fp_path);
 
         fprintf(stderr, "Running with producer %s\n", curr_producer_info.producer_name);
@@ -149,7 +165,7 @@ int main(int argc, char **argv)
     for (int producer_type = 0; producer_type < NUM_PRODUCER_TYPES; producer_type++)
     {
         curr_producer_info = private_producer_infos[0][producer_type]; // Just use 0, could use any index really
-        sprintf(curr_stats_fp_path, "%s%s_%s_cores_private.json", stats_fp_base, curr_producer_info.producer_name, actual_cores_str);
+        sprintf(curr_stats_fp_path, "%s%s_%d_cores_private.json", stats_fp_base, curr_producer_info.producer_name, actual_cores);
         stats_fp = init_stats_fp(curr_stats_fp_path);
 
         fprintf(stderr, "Running with producer %s\n", curr_producer_info.producer_name);
@@ -169,14 +185,8 @@ int main(int argc, char **argv)
         write_summary_stats(stats_fp, actual_cores, wtime_elapsed_avg, input_file_size);
         fprintf(stderr, "{ \"n_cores\": %d, \"elapsed_time_avg\": %f, \"bytes_sent\": %zu }\n", actual_cores, wtime_elapsed_avg, input_file_size);
 
+        // TODO: Maybe free the used producer info here? Clear some RAM
         fclose(stats_fp);
     }
 
-    return EXIT_SUCCESS;
-}
-
-void write_summary_stats(FILE *stats_fp, int cores, double elapsed_avg, size_t file_size)
-{
-    fprintf(stats_fp, "{ \"n_cores\": %d, \"elapsed_time_avg\": %f, \"bytes_sent\": %zu }\n", cores, elapsed_avg, file_size);
-    fflush(stats_fp);
 }
