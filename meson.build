@@ -2,8 +2,8 @@ project('parallel-producer', 'c', 'cpp')
 
 cc = meson.get_compiler('c')
 
-c_args = ['-Wall', '-Wextra', '-Ofast', '-lrdkafka', '-fopenmp']
-c_args_debug = ['-Wall', '-Wextra', '-g', '-lrdkafka', '-fopenmp']
+c_args = ['-Wall', '-Wextra', '-Ofast', '-lm', '-lrdkafka', '-fopenmp']
+c_args_debug = ['-Wall', '-Wextra', '-g', '-lm', '-lrdkafka', '-fopenmp']
 
 
 inc_dir = include_directories(

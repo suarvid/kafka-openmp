@@ -11,13 +11,16 @@
 #include "parallel_producer.h"
 #include "producer_builder.h"
 #include "kafka_utils.h"
+#include "trapezoid.h"
 #include <omp.h>
 
 #define MEASUREMENTS_PER_RUN 5
-#define SLEEP_BETWEEN_MEASUREMENTS 20 //seconds
+#define SLEEP_BETWEEN_MEASUREMENTS 20 // seconds
 
 void write_summary_stats(FILE *stats_fp, int cores, double elapsed_avg, size_t file_size);
 void benchmark_binary_data(FILE *input_fp, char *brokers, char *topic, char *stats_fp_base, int actual_cores);
+void benchmark_with_trapezoids(int n_threads, int n_trapezoids, rd_kafka_t *producer, char *topic, char *brokers, char *stats_fp_base);
+producer_info_t **init_private_producer_infos(int actual_cores, char *brokers);
 
 int get_actual_n_cores(int n_requested_cores)
 {
@@ -103,7 +106,6 @@ void write_summary_stats(FILE *stats_fp, int cores, double elapsed_avg, size_t f
     fflush(stats_fp);
 }
 
-
 void benchmark_binary_data(FILE *input_fp, char *brokers, char *topic, char *stats_fp_base, int actual_cores)
 {
 
@@ -154,11 +156,12 @@ void benchmark_binary_data(FILE *input_fp, char *brokers, char *topic, char *sta
 
     free(producer_infos);
 
-    producer_info_t **private_producer_infos = malloc(sizeof(struct producer_info *));
-    for (int thread_num = 0; thread_num < actual_cores; thread_num++)
-    {
-        private_producer_infos[thread_num] = init_producers(brokers);
-    }
+    producer_info_t **private_producer_infos = init_private_producer_infos(brokers, actual_cores);
+    // producer_info_t **private_producer_infos = malloc(sizeof(struct producer_info *));
+    // for (int thread_num = 0; thread_num < actual_cores; thread_num++)
+    //{
+    //     private_producer_infos[thread_num] = init_producers(brokers);
+    // }
 
     wtime_elapsed_total = 0.0;
 
@@ -188,5 +191,48 @@ void benchmark_binary_data(FILE *input_fp, char *brokers, char *topic, char *sta
         // TODO: Maybe free the used producer info here? Clear some RAM
         fclose(stats_fp);
     }
+}
 
+void benchmark_with_trapezoids(int n_threads, int n_trapezoids, rd_kafka_t *producer, char *topic, char *brokers, char *stats_fp_base)
+{
+
+    // TODO: Continue here, use openmp to actually measure elapsed time, calculate average
+    // Also write to the file, update path correctly, take number of trapezoids as command-line arg
+    char curr_stats_fp_path[512];
+    double wtime_start;
+    double wtime_end;
+    double wtime_elapsed;
+    double wtime_elapsed_total = 0.0;
+    double wtime_elapsed_avg;
+
+    producer_info_t **private_producer_infos = init_private_producer_infos(brokers, n_threads);
+
+    for (int producer_type = 0; producer_type < NUM_PRODUCER_TYPES; producer_type++)
+    {
+        for (int measurement = 0; measurement < MEASUREMENTS_PER_RUN; measurement++)
+        {
+            producer_info_t curr_producer_info = private_producer_infos[0][producer_type];
+            sprintf(curr_stats_fp_path, "%s%s_%d_cores_private_trapezoid.json", stats_fp_base, curr_producer_info.producer_name, n_threads);
+            benchmark_with_trapezoids_private(n_threads, topic);
+        }
+    }
+
+    producer_info_t *producer_infos = init_producers(brokers);
+
+    for (int producer_type = 0; producer_type < NUM_PRODUCER_TYPES; producer_type++)
+    {
+        producer_info_t curr_producer_info = producer_infos[producer_type];
+        benchmark_with_trapezoids_shared(n_threads, producer, topic);
+    }
+}
+
+producer_info_t **init_private_producer_infos(int actual_cores, char *brokers)
+{
+    producer_info_t **private_producer_infos = malloc(sizeof(struct producer_info *));
+    for (int thread_num = 0; thread_num < actual_cores; thread_num++)
+    {
+        private_producer_infos[thread_num] = init_producers(brokers);
+    }
+
+    return private_producer_infos;
 }

@@ -5,6 +5,7 @@
 #include <math.h>
 
 #include "kafka_utils.h"
+#include "trapezoid.h"
 
 #define RIGHT_POINT_TRAPEZOID 100.0
 
@@ -20,7 +21,6 @@ void benchmark_with_trapezoids_private(int n_threads, const char *topic)
     {
         rd_kafka_t *producer = create_producer();
         estimate_integral(left, RIGHT_POINT_TRAPEZOID, 1000, n_threads, producer, topic);
-        //rd_kafka_destroy(producer);
     }
 
 }

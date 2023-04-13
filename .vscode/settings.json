@@ -4,5 +4,6 @@
         "*.tcc": "c",
         "string": "c",
         "streambuf": "c"
-    }
+    },
+    "C_Cpp.default.compileCommands": "builddir/vscode_compile_commands.json"
 }
