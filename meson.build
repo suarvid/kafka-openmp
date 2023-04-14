@@ -20,8 +20,9 @@ sources = files(
 
 kafkadep = dependency('rdkafka')
 ompdep = dependency('openmp')
+mathdep = cc.find_library('m')
 
-dependencies = [kafkadep, ompdep]
+dependencies = [kafkadep, ompdep, mathdep]
 
 executable('parallel-producer',
     sources,

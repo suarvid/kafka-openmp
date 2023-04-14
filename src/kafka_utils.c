@@ -69,3 +69,9 @@ FILE *init_stats_fp(const char *filename)
     }
     return stats_fp;
 }
+
+void write_summary_stats(FILE *stats_fp, int cores, double elapsed_avg, size_t file_size)
+{
+    fprintf(stats_fp, "{ \"n_cores\": %d, \"elapsed_time_avg\": %f, \"bytes_sent\": %zu }\n", cores, elapsed_avg, file_size);
+    fflush(stats_fp);
+}

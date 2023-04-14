@@ -3,7 +3,8 @@
     "files.associations": {
         "*.tcc": "c",
         "string": "c",
-        "streambuf": "c"
+        "streambuf": "c",
+        "time.h": "c"
     },
     "C_Cpp.default.compileCommands": "builddir/vscode_compile_commands.json"
 }
