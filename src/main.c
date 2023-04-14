@@ -189,8 +189,8 @@ void benchmark_binary_data(FILE *input_fp, char *brokers, char *topic, char *sta
 
 void benchmark_with_trapezoids(int n_threads, long long n_trapezoids, char *topic, char *brokers, char *stats_fp_base)
 {
-    producer_info_t **private_prod_infos = init_private_producer_infos(n_threads, brokers);
-    benchmark_with_trapezoids_private(n_threads, n_trapezoids, topic, private_prod_infos);
+    //producer_info_t **private_prod_infos = init_private_producer_infos(n_threads, brokers);
+    //benchmark_with_trapezoids_private(n_threads, n_trapezoids, topic, private_prod_infos);
     benchmark_with_trapezoids_shared(n_threads, n_trapezoids, topic, brokers);
 }
 

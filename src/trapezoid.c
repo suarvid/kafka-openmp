@@ -49,6 +49,7 @@ void benchmark_with_trapezoids_private(int n_threads, unsigned long long n_trape
 
 void benchmark_with_trapezoids_shared(int n_threads, unsigned long long n_trapezoids, const char *topic, const char *brokers)
 {
+    fprintf(stderr, "Benchmarking with trapezoids (shared)\n");
     double left = 0.0;
     double wtime_start;
     double wtime_end;
@@ -59,10 +60,14 @@ void benchmark_with_trapezoids_shared(int n_threads, unsigned long long n_trapez
     char *stats_fp_base = "output_data/trapezoids/";
 
     producer_info_t *producer_infos = init_producers(brokers);
+    fprintf(stderr, "Producers initialized\n");
 
     for (int producer_type = 0; producer_type < NUM_PRODUCER_TYPES; producer_type++)
     {
+        fprintf(stderr, "Producer type: %d\n", producer_type);
+        // TODO: This results in a segfault
         char *curr_producer_name = producer_infos[producer_type].producer_name;
+        fprintf(stderr, "Current Producer: %s\n", curr_producer_name);
         sprintf(curr_stats_fp_path, "%s%s_%d_cores_shared.json", stats_fp_base, curr_producer_name, n_threads);
         stats_fp = init_stats_fp(curr_stats_fp_path);
         for (int measurement = 0; measurement < MEASUREMENTS_PER_RUN; measurement++)
