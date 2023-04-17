@@ -16,10 +16,11 @@
 
 void write_summary_stats(FILE *stats_fp, int cores, double elapsed_avg, size_t file_size);
 void benchmark_binary_data(FILE *input_fp, char *brokers, char *topic, char *stats_fp_base, int actual_cores);
-void benchmark_with_trapezoids(int n_threads, long long n_trapezoids, char *topic, char *brokers, char *stats_fp_base);
+void benchmark_with_trapezoids(int n_threads, unsigned long long n_trapezoids, char *topic, char *brokers, char *stats_fp_base);
 producer_info_t **init_private_producer_infos(int actual_cores, char *brokers);
 int get_actual_n_cores(int n_requested_cores);
 producer_info_t *init_producers(const char *brokers);
+producer_info_t *init_producers_reverse_order(const char *brokers);
 
 int main(int argc, char **argv)
 {
@@ -53,8 +54,8 @@ int main(int argc, char **argv)
         fprintf(stderr, "Failed to open input file %s\n", input_file);
     }
 
-    // benchmark_binary_data(input_fp, brokers, topic, stats_fp_base_binary, actual_cores);
-    benchmark_with_trapezoids(actual_cores, 1000000, topic, brokers, stats_fp_base_trap);
+    //benchmark_binary_data(input_fp, brokers, topic, stats_fp_base_binary, actual_cores);
+    benchmark_with_trapezoids(actual_cores, 1000000000, topic, brokers, stats_fp_base_trap);
 
     return EXIT_SUCCESS;
 }
@@ -70,36 +71,6 @@ int get_actual_n_cores(int n_requested_cores)
     return n_requested_cores;
 }
 
-// Should create one of each kind of producer
-// Is kind of ass, but unlikely to change
-producer_info_t *init_producers(const char *brokers)
-{
-    producer_info_t *producer_infos = malloc(sizeof(producer_info_t) * NUM_PRODUCER_TYPES);
-    producer_infos[0].producer = create_producer_basic(brokers);
-    producer_infos[0].producer_name = "basic_producer";
-    producer_infos[1].producer = create_producer_ack_one(brokers);
-    producer_infos[1].producer_name = "producer_ack_one";
-    producer_infos[2].producer = create_producer_high_throughput_all_acks_idemp_enabled_gzip(brokers);
-    producer_infos[2].producer_name = "producer_high_throughput_all_acks_idemp_enabled_gzip";
-    producer_infos[3].producer = create_producer_high_throughput_all_acks_idemp_enabled_snappy(brokers);
-    producer_infos[3].producer_name = "producer_high_throughput_all_acks_idemp_enabled_snappy";
-    producer_infos[4].producer = create_producer_high_throughput_all_acks_idemp_enabled_lz4(brokers);
-    producer_infos[4].producer_name = "producer_high_throughput_all_acks_idemp_enabled_lz4";
-    producer_infos[5].producer = create_producer_high_throughput_all_acks_no_idemp_gzip(brokers);
-    producer_infos[5].producer_name = "producer_high_throughput_all_acks_no_idemp_gzip";
-    producer_infos[6].producer = create_producer_high_throughput_all_acks_no_idemp_snappy(brokers);
-    producer_infos[6].producer_name = "producer_high_throughput_all_acks_no_idemp_snappy";
-    producer_infos[7].producer = create_producer_high_throughput_all_acks_no_idemp_lz4(brokers);
-    producer_infos[7].producer_name = "producer_high_throughput_all_acks_no_idemp_lz4";
-    producer_infos[8].producer = create_producer_high_throughput_no_acks_no_idemp_gzip(brokers);
-    producer_infos[8].producer_name = "producer_high_throughput_no_acks_no_idemp_gzip";
-    producer_infos[9].producer = create_producer_high_throughput_no_acks_no_idemp_lz4(brokers);
-    producer_infos[9].producer_name = "producer_high_throughput_no_acks_no_idemp_lz4";
-    producer_infos[10].producer = create_producer_high_throughput_no_acks_no_idemp_snappy(brokers);
-    producer_infos[10].producer_name = "producer_high_throughput_no_acks_no_idemp_snappy";
-    // Should maybe try to do the same without compression?
-    return producer_infos;
-}
 
 void benchmark_binary_data(FILE *input_fp, char *brokers, char *topic, char *stats_fp_base, int actual_cores)
 {
@@ -111,6 +82,7 @@ void benchmark_binary_data(FILE *input_fp, char *brokers, char *topic, char *sta
     fprintf(stderr, "Read file contents\n");
 
     producer_info_t *producer_infos = init_producers(brokers);
+    //producer_info_t *producer_infos = init_producers_reverse_order(brokers);
     producer_info_t curr_producer_info;
     fprintf(stderr, "Initiated producers\n");
 
@@ -187,10 +159,10 @@ void benchmark_binary_data(FILE *input_fp, char *brokers, char *topic, char *sta
     }
 }
 
-void benchmark_with_trapezoids(int n_threads, long long n_trapezoids, char *topic, char *brokers, char *stats_fp_base)
+void benchmark_with_trapezoids(int n_threads, unsigned long long n_trapezoids, char *topic, char *brokers, char *stats_fp_base)
 {
-    //producer_info_t **private_prod_infos = init_private_producer_infos(n_threads, brokers);
-    //benchmark_with_trapezoids_private(n_threads, n_trapezoids, topic, private_prod_infos);
+    producer_info_t **private_prod_infos = init_private_producer_infos(n_threads, brokers);
+    benchmark_with_trapezoids_private(n_threads, n_trapezoids, topic, private_prod_infos);
     benchmark_with_trapezoids_shared(n_threads, n_trapezoids, topic, brokers);
 }
 

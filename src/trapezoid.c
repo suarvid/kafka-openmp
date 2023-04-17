@@ -10,6 +10,7 @@
 #include "producer_builder.h"
 
 #define RIGHT_POINT_TRAPEZOID 1000.0
+#define AREAS_PER_MSG 100
 
 void estimate_integral(double left, double right, unsigned long long num_trapezoids, int n_threads, int thread_id, rd_kafka_t *producer, const char *topic);
 
@@ -95,20 +96,30 @@ void estimate_integral(double left, double right, unsigned long long num_trapezo
 
     double trapezoid_base, x, res;
     double local_left, local_right;
-    int trapezoids_per_thread;
+    long area_cnt = 0;
+    unsigned long long trapezoids_per_thread;
 
     trapezoid_base = (right - left) / num_trapezoids;
     trapezoids_per_thread = num_trapezoids / n_threads;
+    if (thread_id == 0)
+    {
+        fprintf(stderr, "Trapezoids per thread: %ld\n", trapezoids_per_thread);
+    }
     local_left = left + thread_id * (trapezoid_base * trapezoids_per_thread);
     local_right = local_left + trapezoid_base * trapezoids_per_thread;
 
-    res = (sin(local_left) + sin(local_right)) / 2.0;
-    send_message(producer, topic, &res, sizeof(res));
+    res += (sin(local_left) + sin(local_right)) / 2.0;
     for (int i = 1; i < trapezoids_per_thread; i++)
     {
         x = local_left + i * trapezoid_base;
-        res = sin(x);
-        send_message(producer, topic, &res, sizeof(res));
+        res += sin(x);
+        area_cnt++;
+        if (area_cnt == AREAS_PER_MSG) // Decides the rate at which messages should be sent
+        {
+            //fprintf(stderr, "Sending message\n");
+            send_message(producer, topic, (char *)&res, sizeof(res));
+            area_cnt = 0;
+        }
         // my_result += sin(x);
     }
 
@@ -116,4 +127,9 @@ void estimate_integral(double left, double right, unsigned long long num_trapezo
     // send the result to the broker
     // This will probably result in wayyyy too few messages being sent
     // send_message(producer, topic, &my_result, sizeof(my_result));
+}
+
+double area_function(double x)
+{
+    return 3.1415 * cos(x) * sin(x);
 }
