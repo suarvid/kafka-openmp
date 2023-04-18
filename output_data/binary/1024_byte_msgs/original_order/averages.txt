@@ -1,0 +1,19 @@
+--- BINARY DATA ------
+
+	--- SINGLE THREAD ---
+	Avg 1 core (shared): 30,61 seconds
+	
+	--- SHARED ---
+	Avg 2 cores, shared: 41,67 seconds; speedup: 0.73; efficiency: 0.365
+	Avg 6 cores, shared: 38,13 seconds; speedup: 0.80; efficiency: 0.133
+	Avg 10 cores, shared: 40,37 seconds; speedup: 0.76; efficiency: 0.076
+	Avg 12 cores, shared: 40,39 seconds; speedup: 0.76; efficiency: 
+	
+	--- PRIVATE ---
+	Avg 2 cores, private: 17,3 seconds; speedup: 1,77; efficiency: 0.885
+	Avg 6 cores, private: 8,44 seconds; speedup: 3,63; efficiency: 0.605
+	Avg 10 cores, private: 7,15 seconds; speedup: 4,28; efficiency: 0.428
+
+
+--- TRAPEZOIDS ---
+

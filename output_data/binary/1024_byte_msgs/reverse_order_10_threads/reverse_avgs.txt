@@ -1,0 +1,15 @@
+# 1024 byte messages
+# 10 threads, private
+# Reverse order, avg execution times in seconds
+basic producer: 1.92 
+producer, ack one: 3.69
+throughput, all acks, idemp, gzip: 4.35
+throughput, all acks, idemp, lz4: 5.89
+throughput, all acks, idemp, snappy: 5.10
+throughput, all acks, no idemp, gzip: 6.61
+throughput, all acks, no idemp, lz4: 7.99
+throughput, all acks, no idemp, snappy: 7.29
+throughput, no acks, no idemp, gzip: 8.72
+throughput, no acks, no idemp, lz4: 9.41
+throughput, no acks, no idemp, snappy: 10.08
+

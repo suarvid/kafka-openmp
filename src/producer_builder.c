@@ -27,6 +27,121 @@ rd_kafka_t *create_producer_ack_one(const char *brokers)
     return producer;
 }
 
+
+rd_kafka_t *create_producer_ack_all_idemp_enabled(const char *brokers)
+{
+    rd_kafka_conf_t *config = rd_kafka_conf_new();
+    with_bootstrap_servers(config, brokers);
+    with_acks_one(config);
+    with_stats_cb(config, stats_cb);
+
+    rd_kafka_t *producer = create_producer_with_config(config);
+    return producer;
+}
+
+
+rd_kafka_t *create_producer_medium_vals_no_acks_no_idemp_gzip(const char *brokers)
+{
+    rd_kafka_conf_t *config = rd_kafka_conf_new();
+    with_bootstrap_servers(config, brokers);
+    with_queue_buffering_medium(config);
+    with_batch_size_medium(config);
+    with_linger_time_medium(config);
+    without_acks(config);
+    with_compression_gzip(config);
+    with_stats_cb(config, stats_cb);
+
+    rd_kafka_t *producer = create_producer_with_config(config);
+
+    return producer;
+}
+
+rd_kafka_t *create_producer_medium_vals_no_acks_no_idemp_lz4(const char *brokers)
+{
+    rd_kafka_conf_t *config = rd_kafka_conf_new();
+    with_bootstrap_servers(config, brokers);
+    with_queue_buffering_medium(config);
+    with_batch_size_medium(config);
+    with_linger_time_medium(config);
+    without_acks(config);
+    with_compression_lz4(config);
+    with_stats_cb(config, stats_cb);
+
+    rd_kafka_t *producer = create_producer_with_config(config);
+
+    return producer;
+
+}
+
+rd_kafka_t *create_producer_medium_vals_no_acks_no_idemp_snappy(const char *brokers)
+{
+    rd_kafka_conf_t *config = rd_kafka_conf_new();
+    with_bootstrap_servers(config, brokers);
+    with_queue_buffering_medium(config);
+    with_batch_size_medium(config);
+    with_linger_time_medium(config);
+    without_acks(config);
+    with_compression_snappy(config);
+    with_stats_cb(config, stats_cb);
+
+    rd_kafka_t *producer = create_producer_with_config(config);
+
+    return producer;
+
+}
+
+rd_kafka_t *create_producer_medium_vals_all_acks_idemp_enabled_gzip(const char *brokers)
+{
+    rd_kafka_conf_t *config = rd_kafka_conf_new();
+    with_bootstrap_servers(config, brokers);
+    with_queue_buffering_medium(config);
+    with_batch_size_medium(config);
+    with_linger_time_medium(config);
+    with_acks_all(config);
+    with_idempotence(config);
+    with_compression_gzip(config);
+    with_stats_cb(config, stats_cb);
+
+    rd_kafka_t *producer = create_producer_with_config(config);
+
+    return producer;
+
+}
+
+rd_kafka_t *create_producer_medium_vals_all_acks_idemp_enabled_lz4(const char *brokers)
+{
+    rd_kafka_conf_t *config = rd_kafka_conf_new();
+    with_bootstrap_servers(config, brokers);
+    with_queue_buffering_medium(config);
+    with_batch_size_medium(config);
+    with_linger_time_medium(config);
+    with_acks_all(config);
+    with_idempotence(config);
+    with_compression_lz4(config);
+    with_stats_cb(config, stats_cb);
+
+    rd_kafka_t *producer = create_producer_with_config(config);
+
+    return producer;
+}
+
+rd_kafka_t *create_producer_medium_vals_all_acks_idemp_enabled_snappy(const char *brokers)
+{
+    rd_kafka_conf_t *config = rd_kafka_conf_new();
+    with_bootstrap_servers(config, brokers);
+    with_queue_buffering_medium(config);
+    with_batch_size_medium(config);
+    with_linger_time_medium(config);
+    with_acks_all(config);
+    with_idempotence(config);
+    with_compression_snappy(config);
+    with_stats_cb(config, stats_cb);
+
+    rd_kafka_t *producer = create_producer_with_config(config);
+
+    return producer;
+}
+
 rd_kafka_t *create_producer_high_throughput_all_acks_idemp_enabled_gzip(const char *brokers)
 {
     rd_kafka_conf_t *config = rd_kafka_conf_new();
@@ -337,6 +452,30 @@ void with_linger_time_long(rd_kafka_conf_t *config)
     }
 }
 
+void with_linger_time_medium(rd_kafka_conf_t *config)
+{
+    char errstr[512];
+
+    if (rd_kafka_conf_set(config, "linger.ms", "1000", errstr, sizeof(errstr)) != RD_KAFKA_CONF_OK)
+    {
+        fprintf(stderr, "%s\n", errstr);
+        exit(EXIT_FAILURE);
+    }
+
+}
+
+void with_linger_time_small(rd_kafka_conf_t *config)
+{
+    char errstr[512];
+
+    if (rd_kafka_conf_set(config, "linger.ms", "5", errstr, sizeof(errstr)) != RD_KAFKA_CONF_OK)
+    {
+        fprintf(stderr, "%s\n", errstr);
+        exit(EXIT_FAILURE);
+    }
+
+}
+
 void with_linger_time_100(rd_kafka_conf_t *config)
 {
     char errstr[512];
@@ -385,7 +524,7 @@ void with_batch_size_medium(rd_kafka_conf_t *config)
 {
     char errstr[512];
 
-    if (rd_kafka_conf_set(config, "batch.size", "1048576", errstr, sizeof(errstr)) != RD_KAFKA_CONF_OK)
+    if (rd_kafka_conf_set(config, "batch.size", "10000000", errstr, sizeof(errstr)) != RD_KAFKA_CONF_OK)
     {
         fprintf(stderr, "%s\n", errstr);
         exit(EXIT_FAILURE);
@@ -396,7 +535,7 @@ void with_batch_size_small(rd_kafka_conf_t *config)
 {
     char errstr[512];
 
-    if (rd_kafka_conf_set(config, "batch.size", "16384", errstr, sizeof(errstr)) != RD_KAFKA_CONF_OK)
+    if (rd_kafka_conf_set(config, "batch.size", "1000000", errstr, sizeof(errstr)) != RD_KAFKA_CONF_OK)
     {
         fprintf(stderr, "%s\n", errstr);
         exit(EXIT_FAILURE);
@@ -468,8 +607,7 @@ void with_queue_buffering_large(rd_kafka_conf_t *config)
 void with_queue_buffering_medium(rd_kafka_conf_t *config)
 {
     char errstr[512];
-
-    if (rd_kafka_conf_set(config, "queue.buffering.max.kbytes", "1048576", errstr, sizeof(errstr)) != RD_KAFKA_CONF_OK)
+    if (rd_kafka_conf_set(config, "queue.buffering.max.kbytes", "10485760", errstr, sizeof(errstr)) != RD_KAFKA_CONF_OK) // ten times the default value
     {
         fprintf(stderr, "%s\n", errstr);
         exit(EXIT_FAILURE);
@@ -487,7 +625,7 @@ void with_queue_buffering_small(rd_kafka_conf_t *config)
 {
     char errstr[512];
 
-    if (rd_kafka_conf_set(config, "queue.buffering.max.kbytes", "16384", errstr, sizeof(errstr)) != RD_KAFKA_CONF_OK)
+    if (rd_kafka_conf_set(config, "queue.buffering.max.kbytes", "1048576", errstr, sizeof(errstr)) != RD_KAFKA_CONF_OK)
     {
         fprintf(stderr, "%s\n", errstr);
         exit(EXIT_FAILURE);

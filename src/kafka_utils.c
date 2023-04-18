@@ -80,6 +80,27 @@ void write_summary_stats(FILE *stats_fp, int cores, double elapsed_avg, size_t f
 }
 
 
+producer_info_t* init_new_producer_types(const char *brokers)
+{
+    producer_info_t *producer_infos = malloc(sizeof(producer_info_t) * NUM_NEW_PRODUCER_TYPES);
+    producer_infos[0].producer = create_producer_medium_vals_no_acks_no_idemp_gzip(brokers);
+    producer_infos[0].producer_name = "producer_medium_vals_no_acks_no_idemp_gzip";
+    producer_infos[1].producer = create_producer_medium_vals_no_acks_no_idemp_lz4(brokers);
+    producer_infos[1].producer_name = "producer_medium_vals_no_acks_no_idemp_lz4";
+    producer_infos[2].producer = create_producer_medium_vals_no_acks_no_idemp_snappy(brokers);
+    producer_infos[2].producer_name = "producer_medium_vals_no_acks_no_idemp_snappy";
+    producer_infos[3].producer = create_producer_medium_vals_all_acks_idemp_enabled_gzip(brokers);
+    producer_infos[3].producer_name = "producer_medium_vals_all_acks_idemp_enabled_gzip";
+    producer_infos[4].producer = create_producer_medium_vals_all_acks_idemp_enabled_lz4(brokers);
+    producer_infos[4].producer_name = "producer_medium_vals_all_acks_idemp_enabled_lz4";
+    producer_infos[5].producer = create_producer_medium_vals_all_acks_idemp_enabled_snappy(brokers);
+    producer_infos[5].producer_name = "producer_medium_vals_all_acks_idemp_enabled_snappy";
+    producer_infos[6].producer = create_producer_ack_all_idemp_enabled(brokers);
+    producer_infos[6].producer_name = "basic_producer_ack_all_idemp_enabled";
+
+    return producer_infos;
+}
+
 // Should create one of each kind of producer
 // Is kind of ass, but unlikely to change
 producer_info_t *init_producers(const char *brokers)

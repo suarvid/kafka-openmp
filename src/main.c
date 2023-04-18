@@ -18,9 +18,8 @@ void write_summary_stats(FILE *stats_fp, int cores, double elapsed_avg, size_t f
 void benchmark_binary_data(FILE *input_fp, char *brokers, char *topic, char *stats_fp_base, int actual_cores);
 void benchmark_with_trapezoids(int n_threads, unsigned long long n_trapezoids, char *topic, char *brokers, char *stats_fp_base);
 producer_info_t **init_private_producer_infos(int actual_cores, char *brokers);
+producer_info_t **init_new_private_producer_infos(int actual_cores, char *brokers);
 int get_actual_n_cores(int n_requested_cores);
-producer_info_t *init_producers(const char *brokers);
-producer_info_t *init_producers_reverse_order(const char *brokers);
 
 int main(int argc, char **argv)
 {
@@ -54,8 +53,8 @@ int main(int argc, char **argv)
         fprintf(stderr, "Failed to open input file %s\n", input_file);
     }
 
-    //benchmark_binary_data(input_fp, brokers, topic, stats_fp_base_binary, actual_cores);
-    benchmark_with_trapezoids(actual_cores, 1000000000, topic, brokers, stats_fp_base_trap);
+    benchmark_binary_data(input_fp, brokers, topic, stats_fp_base_binary, actual_cores);
+    //benchmark_with_trapezoids(actual_cores, 1000000000, topic, brokers, stats_fp_base_trap);
 
     return EXIT_SUCCESS;
 }
@@ -81,8 +80,9 @@ void benchmark_binary_data(FILE *input_fp, char *brokers, char *topic, char *sta
     read_file_contents(input_fp, input_file_buffer, input_file_size);
     fprintf(stderr, "Read file contents\n");
 
-    producer_info_t *producer_infos = init_producers(brokers);
+    //producer_info_t *producer_infos = init_producers(brokers);
     //producer_info_t *producer_infos = init_producers_reverse_order(brokers);
+    producer_info_t *producer_infos = init_new_producer_types(brokers);
     producer_info_t curr_producer_info;
     fprintf(stderr, "Initiated producers\n");
 
@@ -94,7 +94,7 @@ void benchmark_binary_data(FILE *input_fp, char *brokers, char *topic, char *sta
     double wtime_elapsed_avg;
 
     // Run once per type of producer
-    for (int i = 0; i < NUM_PRODUCER_TYPES; i++)
+    for (int i = 0; i < NUM_NEW_PRODUCER_TYPES; i++)
     {
         curr_producer_info = producer_infos[i];
         // Shared
@@ -123,40 +123,41 @@ void benchmark_binary_data(FILE *input_fp, char *brokers, char *topic, char *sta
 
     free(producer_infos);
 
-    producer_info_t **private_producer_infos = init_private_producer_infos(actual_cores, brokers);
+    ////producer_info_t **private_producer_infos = init_private_producer_infos(actual_cores, brokers);
+    //producer_info_t **private_producer_infos = init_new_private_producer_infos(actual_cores, brokers);
 
-    wtime_elapsed_total = 0.0;
+    //wtime_elapsed_total = 0.0;
 
-    for (int producer_type = 0; producer_type < NUM_PRODUCER_TYPES; producer_type++)
-    {
-        curr_producer_info = private_producer_infos[0][producer_type]; // Just use 0, could use any index really
-        sprintf(curr_stats_fp_path, "%s%s_%d_cores_private.json", stats_fp_base, curr_producer_info.producer_name, actual_cores);
-        stats_fp = init_stats_fp(curr_stats_fp_path);
+    //for (int producer_type = 0; producer_type < NUM_NEW_PRODUCER_TYPES; producer_type++)
+    //{
+    //    curr_producer_info = private_producer_infos[0][producer_type]; // Just use 0, could use any index really
+    //    sprintf(curr_stats_fp_path, "%s%s_%d_cores_private.json", stats_fp_base, curr_producer_info.producer_name, actual_cores);
+    //    stats_fp = init_stats_fp(curr_stats_fp_path);
 
-        fprintf(stderr, "Running with producer %s\n", curr_producer_info.producer_name);
-        fprintf(stderr, "Logging stats to file %s\n", curr_stats_fp_path);
+    //    fprintf(stderr, "Running with producer %s\n", curr_producer_info.producer_name);
+    //    fprintf(stderr, "Logging stats to file %s\n", curr_stats_fp_path);
 
-        for (int measurement = 0; measurement < MEASUREMENTS_PER_RUN; measurement++)
-        {
-            wtime_start = omp_get_wtime();
-            publish_parallel_for_private(input_file_size, input_file_buffer, private_producer_infos, producer_type, topic, actual_cores);
-            wtime_end = omp_get_wtime();
-            wtime_elapsed = wtime_end - wtime_start;
-            wtime_elapsed_total += wtime_elapsed;
-            sleep(SLEEP_BETWEEN_MEASUREMENTS);
-        }
+    //    for (int measurement = 0; measurement < MEASUREMENTS_PER_RUN; measurement++)
+    //    {
+    //        wtime_start = omp_get_wtime();
+    //        publish_parallel_for_private(input_file_size, input_file_buffer, private_producer_infos, producer_type, topic, actual_cores);
+    //        wtime_end = omp_get_wtime();
+    //        wtime_elapsed = wtime_end - wtime_start;
+    //        wtime_elapsed_total += wtime_elapsed;
+    //        sleep(SLEEP_BETWEEN_MEASUREMENTS);
+    //    }
 
-        wtime_elapsed_avg = wtime_elapsed_total / MEASUREMENTS_PER_RUN;
-        write_summary_stats(stats_fp, actual_cores, wtime_elapsed_avg, input_file_size);
-        fprintf(stderr, "{ \"n_cores\": %d, \"elapsed_time_avg\": %f, \"bytes_sent\": %zu }\n", actual_cores, wtime_elapsed_avg, input_file_size);
+    //    wtime_elapsed_avg = wtime_elapsed_total / MEASUREMENTS_PER_RUN;
+    //    write_summary_stats(stats_fp, actual_cores, wtime_elapsed_avg, input_file_size);
+    //    fprintf(stderr, "{ \"n_cores\": %d, \"elapsed_time_avg\": %f, \"bytes_sent\": %zu }\n", actual_cores, wtime_elapsed_avg, input_file_size);
 
-        // TODO: Maybe free the used producer info here? Clear some RAM
-        fclose(stats_fp);
-        for (int core = 0; core < actual_cores; core++)
-        {
-            rd_kafka_destroy(private_producer_infos[core][producer_type].producer);
-        }
-    }
+    //    // TODO: Maybe free the used producer info here? Clear some RAM
+    //    fclose(stats_fp);
+    //    for (int core = 0; core < actual_cores; core++)
+    //    {
+    //        rd_kafka_destroy(private_producer_infos[core][producer_type].producer);
+    //    }
+    //}
 }
 
 void benchmark_with_trapezoids(int n_threads, unsigned long long n_trapezoids, char *topic, char *brokers, char *stats_fp_base)
@@ -164,6 +165,20 @@ void benchmark_with_trapezoids(int n_threads, unsigned long long n_trapezoids, c
     producer_info_t **private_prod_infos = init_private_producer_infos(n_threads, brokers);
     benchmark_with_trapezoids_private(n_threads, n_trapezoids, topic, private_prod_infos);
     benchmark_with_trapezoids_shared(n_threads, n_trapezoids, topic, brokers);
+}
+
+
+producer_info_t **init_new_private_producer_infos(int actual_cores, char *brokers)
+{
+
+    producer_info_t **private_producer_infos = malloc(sizeof(struct producer_info *) * actual_cores);
+    for (int thread_num = 0; thread_num < actual_cores; thread_num++)
+    {
+        private_producer_infos[thread_num] = init_new_producer_types(brokers);
+    }
+
+    return private_producer_infos;
+
 }
 
 producer_info_t **init_private_producer_infos(int actual_cores, char *brokers)
