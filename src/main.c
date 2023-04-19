@@ -18,7 +18,6 @@ void write_summary_stats(FILE *stats_fp, int cores, double elapsed_avg, size_t f
 void benchmark_binary_data(FILE *input_fp, char *brokers, char *topic, char *stats_fp_base, int actual_cores);
 void benchmark_with_trapezoids(int n_threads, unsigned long long n_trapezoids, char *topic, char *brokers, char *stats_fp_base);
 producer_info_t **init_private_producer_infos(int actual_cores, char *brokers);
-producer_info_t **init_new_private_producer_infos(int actual_cores, char *brokers);
 int get_actual_n_cores(int n_requested_cores);
 
 int main(int argc, char **argv)
@@ -53,8 +52,8 @@ int main(int argc, char **argv)
         fprintf(stderr, "Failed to open input file %s\n", input_file);
     }
 
-    benchmark_binary_data(input_fp, brokers, topic, stats_fp_base_binary, actual_cores);
-    //benchmark_with_trapezoids(actual_cores, 1000000000, topic, brokers, stats_fp_base_trap);
+    //benchmark_binary_data(input_fp, brokers, topic, stats_fp_base_binary, actual_cores);
+    benchmark_with_trapezoids(actual_cores, 1000000000, topic, brokers, stats_fp_base_trap);
 
     return EXIT_SUCCESS;
 }
@@ -123,7 +122,7 @@ void benchmark_binary_data(FILE *input_fp, char *brokers, char *topic, char *sta
 
     free(producer_infos);
 
-    ////producer_info_t **private_producer_infos = init_private_producer_infos(actual_cores, brokers);
+    producer_info_t **private_producer_infos = init_private_producer_infos(actual_cores, brokers);
     //producer_info_t **private_producer_infos = init_new_private_producer_infos(actual_cores, brokers);
 
     //wtime_elapsed_total = 0.0;
@@ -167,19 +166,6 @@ void benchmark_with_trapezoids(int n_threads, unsigned long long n_trapezoids, c
     benchmark_with_trapezoids_shared(n_threads, n_trapezoids, topic, brokers);
 }
 
-
-producer_info_t **init_new_private_producer_infos(int actual_cores, char *brokers)
-{
-
-    producer_info_t **private_producer_infos = malloc(sizeof(struct producer_info *) * actual_cores);
-    for (int thread_num = 0; thread_num < actual_cores; thread_num++)
-    {
-        private_producer_infos[thread_num] = init_new_producer_types(brokers);
-    }
-
-    return private_producer_infos;
-
-}
 
 producer_info_t **init_private_producer_infos(int actual_cores, char *brokers)
 {

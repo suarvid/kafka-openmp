@@ -10,7 +10,7 @@
 #include "producer_builder.h"
 
 #define RIGHT_POINT_TRAPEZOID 1000.0
-#define AREAS_PER_MSG 10000
+#define AREAS_PER_MSG 100
 
 void estimate_integral(double left, double right, unsigned long long num_trapezoids, int n_threads, int thread_id, rd_kafka_t *producer, const char *topic);
 

@@ -2,7 +2,7 @@
 
 #include <librdkafka/rdkafka.h>
 
-#define NUM_PRODUCER_TYPES 11 // kinda sketch but
+#define NUM_PRODUCER_TYPES 18 // kinda sketch but
 #define NUM_NEW_PRODUCER_TYPES 7
 // Throughput
 rd_kafka_t *create_producer_with_config(rd_kafka_conf_t *config);

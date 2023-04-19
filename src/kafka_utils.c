@@ -128,6 +128,20 @@ producer_info_t *init_producers(const char *brokers)
     producer_infos[9].producer_name = "producer_high_throughput_no_acks_no_idemp_lz4";
     producer_infos[10].producer = create_producer_high_throughput_no_acks_no_idemp_snappy(brokers);
     producer_infos[10].producer_name = "producer_high_throughput_no_acks_no_idemp_snappy";
+    producer_infos[11].producer = create_producer_medium_vals_no_acks_no_idemp_gzip(brokers);
+    producer_infos[11].producer_name = "producer_medium_vals_no_acks_no_idemp_gzip";
+    producer_infos[12].producer = create_producer_medium_vals_no_acks_no_idemp_lz4(brokers);
+    producer_infos[12].producer_name = "producer_medium_vals_no_acks_no_idemp_lz4";
+    producer_infos[13].producer = create_producer_medium_vals_no_acks_no_idemp_snappy(brokers);
+    producer_infos[13].producer_name = "producer_medium_vals_no_acks_no_idemp_snappy";
+    producer_infos[14].producer = create_producer_medium_vals_all_acks_idemp_enabled_gzip(brokers);
+    producer_infos[14].producer_name = "producer_medium_vals_all_acks_idemp_enabled_gzip";
+    producer_infos[15].producer = create_producer_medium_vals_all_acks_idemp_enabled_lz4(brokers);
+    producer_infos[15].producer_name = "producer_medium_vals_all_acks_idemp_enabled_lz4";
+    producer_infos[16].producer = create_producer_medium_vals_all_acks_idemp_enabled_snappy(brokers);
+    producer_infos[16].producer_name = "producer_medium_vals_all_acks_idemp_enabled_snappy";
+    producer_infos[17].producer = create_producer_ack_all_idemp_enabled(brokers);
+    producer_infos[17].producer_name = "basic_producer_ack_all_idemp_enabled";
     // Should maybe try to do the same without compression?
     return producer_infos;
 }
@@ -135,28 +149,42 @@ producer_info_t *init_producers(const char *brokers)
 producer_info_t *init_producers_reverse_order(const char *brokers)
 {
     producer_info_t *producer_infos = malloc(sizeof(producer_info_t) * NUM_PRODUCER_TYPES);
-    producer_infos[10].producer = create_producer_basic(brokers);
-    producer_infos[10].producer_name = "basic_producer";
-    producer_infos[9].producer = create_producer_ack_one(brokers);
-    producer_infos[9].producer_name = "producer_ack_one";
-    producer_infos[8].producer = create_producer_high_throughput_all_acks_idemp_enabled_gzip(brokers);
-    producer_infos[8].producer_name = "producer_high_throughput_all_acks_idemp_enabled_gzip";
-    producer_infos[7].producer = create_producer_high_throughput_all_acks_idemp_enabled_snappy(brokers);
-    producer_infos[7].producer_name = "producer_high_throughput_all_acks_idemp_enabled_snappy";
-    producer_infos[6].producer = create_producer_high_throughput_all_acks_idemp_enabled_lz4(brokers);
-    producer_infos[6].producer_name = "producer_high_throughput_all_acks_idemp_enabled_lz4";
-    producer_infos[5].producer = create_producer_high_throughput_all_acks_no_idemp_gzip(brokers);
-    producer_infos[5].producer_name = "producer_high_throughput_all_acks_no_idemp_gzip";
-    producer_infos[4].producer = create_producer_high_throughput_all_acks_no_idemp_snappy(brokers);
-    producer_infos[4].producer_name = "producer_high_throughput_all_acks_no_idemp_snappy";
-    producer_infos[3].producer = create_producer_high_throughput_all_acks_no_idemp_lz4(brokers);
-    producer_infos[3].producer_name = "producer_high_throughput_all_acks_no_idemp_lz4";
-    producer_infos[2].producer = create_producer_high_throughput_no_acks_no_idemp_gzip(brokers);
-    producer_infos[2].producer_name = "producer_high_throughput_no_acks_no_idemp_gzip";
-    producer_infos[1].producer = create_producer_high_throughput_no_acks_no_idemp_lz4(brokers);
-    producer_infos[1].producer_name = "producer_high_throughput_no_acks_no_idemp_lz4";
-    producer_infos[0].producer = create_producer_high_throughput_no_acks_no_idemp_snappy(brokers);
-    producer_infos[0].producer_name = "producer_high_throughput_no_acks_no_idemp_snappy";
+    producer_infos[17].producer = create_producer_basic(brokers);
+    producer_infos[17].producer_name = "basic_producer";
+    producer_infos[16].producer = create_producer_ack_one(brokers);
+    producer_infos[16].producer_name = "producer_ack_one";
+    producer_infos[15].producer = create_producer_high_throughput_all_acks_idemp_enabled_gzip(brokers);
+    producer_infos[15].producer_name = "producer_high_throughput_all_acks_idemp_enabled_gzip";
+    producer_infos[14].producer = create_producer_high_throughput_all_acks_idemp_enabled_snappy(brokers);
+    producer_infos[14].producer_name = "producer_high_throughput_all_acks_idemp_enabled_snappy";
+    producer_infos[13].producer = create_producer_high_throughput_all_acks_idemp_enabled_lz4(brokers);
+    producer_infos[13].producer_name = "producer_high_throughput_all_acks_idemp_enabled_lz4";
+    producer_infos[12].producer = create_producer_high_throughput_all_acks_no_idemp_gzip(brokers);
+    producer_infos[12].producer_name = "producer_high_throughput_all_acks_no_idemp_gzip";
+    producer_infos[11].producer = create_producer_high_throughput_all_acks_no_idemp_snappy(brokers);
+    producer_infos[11].producer_name = "producer_high_throughput_all_acks_no_idemp_snappy";
+    producer_infos[10].producer = create_producer_high_throughput_all_acks_no_idemp_lz4(brokers);
+    producer_infos[10].producer_name = "producer_high_throughput_all_acks_no_idemp_lz4";
+    producer_infos[9].producer = create_producer_high_throughput_no_acks_no_idemp_gzip(brokers);
+    producer_infos[9].producer_name = "producer_high_throughput_no_acks_no_idemp_gzip";
+    producer_infos[8].producer = create_producer_high_throughput_no_acks_no_idemp_lz4(brokers);
+    producer_infos[8].producer_name = "producer_high_throughput_no_acks_no_idemp_lz4";
+    producer_infos[7].producer = create_producer_high_throughput_no_acks_no_idemp_snappy(brokers);
+    producer_infos[7].producer_name = "producer_high_throughput_no_acks_no_idemp_snappy";
+    producer_infos[6].producer = create_producer_medium_vals_no_acks_no_idemp_gzip(brokers);
+    producer_infos[6].producer_name = "producer_medium_vals_no_acks_no_idemp_gzip";
+    producer_infos[5].producer = create_producer_medium_vals_no_acks_no_idemp_lz4(brokers);
+    producer_infos[5].producer_name = "producer_medium_vals_no_acks_no_idemp_lz4";
+    producer_infos[4].producer = create_producer_medium_vals_no_acks_no_idemp_snappy(brokers);
+    producer_infos[4].producer_name = "producer_medium_vals_no_acks_no_idemp_snappy";
+    producer_infos[3].producer = create_producer_medium_vals_all_acks_idemp_enabled_gzip(brokers);
+    producer_infos[3].producer_name = "producer_medium_vals_all_acks_idemp_enabled_gzip";
+    producer_infos[2].producer = create_producer_medium_vals_all_acks_idemp_enabled_lz4(brokers);
+    producer_infos[2].producer_name = "producer_medium_vals_all_acks_idemp_enabled_lz4";
+    producer_infos[1].producer = create_producer_medium_vals_all_acks_idemp_enabled_snappy(brokers);
+    producer_infos[1].producer_name = "producer_medium_vals_all_acks_idemp_enabled_snappy";
+    producer_infos[0].producer = create_producer_ack_all_idemp_enabled(brokers);
+    producer_infos[0].producer_name = "basic_producer_ack_all_idemp_enabled";
     // Should maybe try to do the same without compression?
     return producer_infos;
 
