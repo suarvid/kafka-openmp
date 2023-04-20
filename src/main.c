@@ -22,38 +22,39 @@ int get_actual_n_cores(int n_requested_cores);
 
 int main(int argc, char **argv)
 {
-    const char *brokers;
-    const char *topic;
-    const char *input_file;
-    int n_requested_cores;
-    int actual_cores;
+    get_elaped_total_sum();
+    //const char *brokers;
+    //const char *topic;
+    //const char *input_file;
+    //int n_requested_cores;
+    //int actual_cores;
 
-    if (argc != 5)
-    {
-        fprintf(stderr, "%% Usage: %s <broker> <topic> <inputfile> <n_cores> \n", argv[0]);
-        return EXIT_FAILURE;
-    }
+    //if (argc != 5)
+    //{
+    //    fprintf(stderr, "%% Usage: %s <broker> <topic> <inputfile> <n_cores> \n", argv[0]);
+    //    return EXIT_FAILURE;
+    //}
 
-    brokers = argv[1];
-    topic = argv[2];
-    input_file = argv[3];
-    n_requested_cores = atoi(argv[4]);
-    actual_cores = get_actual_n_cores(n_requested_cores);
+    //brokers = argv[1];
+    //topic = argv[2];
+    //input_file = argv[3];
+    //n_requested_cores = atoi(argv[4]);
+    //actual_cores = get_actual_n_cores(n_requested_cores);
 
-    char *stats_fp_base_binary = "output_data/binary/";
-    char *stats_fp_base_trap = "output_data/trapezoids/";
-    char actual_cores_str[3];
-    sprintf(actual_cores_str, "%d", actual_cores);
-    fprintf(stderr, "Running with %d cores\n", actual_cores);
+    //char *stats_fp_base_binary = "output_data/binary/";
+    //char *stats_fp_base_trap = "output_data/trapezoids/";
+    //char actual_cores_str[3];
+    //sprintf(actual_cores_str, "%d", actual_cores);
+    //fprintf(stderr, "Running with %d cores\n", actual_cores);
 
-    FILE *input_fp = fopen(input_file, "rb");
-    if (input_fp == NULL)
-    {
-        fprintf(stderr, "Failed to open input file %s\n", input_file);
-    }
+    //FILE *input_fp = fopen(input_file, "rb");
+    //if (input_fp == NULL)
+    //{
+    //    fprintf(stderr, "Failed to open input file %s\n", input_file);
+    //}
 
-    //benchmark_binary_data(input_fp, brokers, topic, stats_fp_base_binary, actual_cores);
-    benchmark_with_trapezoids(actual_cores, 1000000000, topic, brokers, stats_fp_base_trap);
+    ////benchmark_binary_data(input_fp, brokers, topic, stats_fp_base_binary, actual_cores);
+    //benchmark_with_trapezoids(actual_cores, 1000000000, topic, brokers, stats_fp_base_trap);
 
     return EXIT_SUCCESS;
 }
