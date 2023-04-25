@@ -24,7 +24,7 @@ for line in lines:
         elapsed_time_avg = line_values["elapsed_time_avg"]
         
 
-print("Total time between socket sends: {} ".format(txidle_sum/num_producer_instances))
-print("Total internal latency: {} ".format(avg_int_latency_sum/num_producer_instances))
-print("Total outbuf latency: {} ".format(avg_outbuf_latency_sum/num_producer_instances))
+print("Total time between socket sends: {} ".format(txidle_sum/(num_producer_instances*1000)))
+print("Total internal latency: {} ".format(avg_int_latency_sum/(num_producer_instances*1000)))
+print("Total outbuf latency: {} ".format(avg_outbuf_latency_sum/(num_producer_instances*1000)))
 print("Average elapsed time: {} ".format(elapsed_time_avg))

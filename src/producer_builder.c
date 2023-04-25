@@ -6,6 +6,32 @@
 
 #define LOG_MS_INTERVAL "2000" // milliseconds
 
+rd_kafka_t *create_producer_basic_gzip(const char *brokers)
+{
+    rd_kafka_conf_t *config = rd_kafka_conf_new();
+    with_bootstrap_servers(config, brokers);
+    with_stats_cb(config, stats_cb);
+    with_compression_gzip(config);
+
+    rd_kafka_t *producer = create_producer_with_config(config);
+
+    return producer;
+}
+
+rd_kafka_t *create_producer_ack_all_idemp_enabled_gzip(const char *brokers)
+{
+    rd_kafka_conf_t *config = rd_kafka_conf_new();
+    with_bootstrap_servers(config, brokers);
+    with_acks_all(config);
+    with_idempotence(config);
+    with_stats_cb(config, stats_cb);
+    with_compression_gzip(config);
+
+    rd_kafka_t *producer = create_producer_with_config(config);
+
+    return producer;
+}
+
 rd_kafka_t *create_producer_basic(const char *brokers)
 {
     rd_kafka_conf_t *config = rd_kafka_conf_new();
@@ -27,7 +53,6 @@ rd_kafka_t *create_producer_ack_one(const char *brokers)
     return producer;
 }
 
-
 rd_kafka_t *create_producer_ack_all_idemp_enabled(const char *brokers)
 {
     rd_kafka_conf_t *config = rd_kafka_conf_new();
@@ -38,7 +63,6 @@ rd_kafka_t *create_producer_ack_all_idemp_enabled(const char *brokers)
     rd_kafka_t *producer = create_producer_with_config(config);
     return producer;
 }
-
 
 rd_kafka_t *create_producer_medium_vals_no_acks_no_idemp_gzip(const char *brokers)
 {
@@ -70,7 +94,6 @@ rd_kafka_t *create_producer_medium_vals_no_acks_no_idemp_lz4(const char *brokers
     rd_kafka_t *producer = create_producer_with_config(config);
 
     return producer;
-
 }
 
 rd_kafka_t *create_producer_medium_vals_no_acks_no_idemp_snappy(const char *brokers)
@@ -87,7 +110,6 @@ rd_kafka_t *create_producer_medium_vals_no_acks_no_idemp_snappy(const char *brok
     rd_kafka_t *producer = create_producer_with_config(config);
 
     return producer;
-
 }
 
 rd_kafka_t *create_producer_medium_vals_all_acks_idemp_enabled_gzip(const char *brokers)
@@ -105,7 +127,6 @@ rd_kafka_t *create_producer_medium_vals_all_acks_idemp_enabled_gzip(const char *
     rd_kafka_t *producer = create_producer_with_config(config);
 
     return producer;
-
 }
 
 rd_kafka_t *create_producer_medium_vals_all_acks_idemp_enabled_lz4(const char *brokers)
@@ -257,7 +278,6 @@ rd_kafka_t *create_producer_high_throughput_all_acks_no_idemp_lz4(const char *br
     return producer;
 }
 
-
 rd_kafka_t *create_producer_high_throughput_no_acks_no_idemp_gzip(const char *brokers)
 {
     rd_kafka_conf_t *config = rd_kafka_conf_new();
@@ -332,7 +352,6 @@ rd_kafka_t *create_producer_low_latency_no_acks_no_idemp(const char *brokers)
     rd_kafka_t *producer = create_producer_with_config(config);
     return producer;
 }
-
 
 rd_kafka_t *create_producer_low_latency_acks_all_idemp_enabled(const char *brokers)
 {
@@ -461,7 +480,6 @@ void with_linger_time_medium(rd_kafka_conf_t *config)
         fprintf(stderr, "%s\n", errstr);
         exit(EXIT_FAILURE);
     }
-
 }
 
 void with_linger_time_small(rd_kafka_conf_t *config)
@@ -473,7 +491,6 @@ void with_linger_time_small(rd_kafka_conf_t *config)
         fprintf(stderr, "%s\n", errstr);
         exit(EXIT_FAILURE);
     }
-
 }
 
 void with_linger_time_100(rd_kafka_conf_t *config)

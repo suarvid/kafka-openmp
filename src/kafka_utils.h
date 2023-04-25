@@ -29,3 +29,5 @@ void write_summary_stats(FILE *stats_fp, int cores, double elapsed_avg, size_t f
 producer_info_t *init_producers(const char *brokers);
 producer_info_t *init_producers_reverse_order(const char *brokers);
 producer_info_t *init_new_producer_types(const char *brokers);
+// For final measurements
+producer_info_t *init_final_producer_types(const char *brokers);

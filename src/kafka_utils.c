@@ -79,6 +79,25 @@ void write_summary_stats(FILE *stats_fp, int cores, double elapsed_avg, size_t f
     fflush(stats_fp);
 }
 
+producer_info_t *init_final_producer_types(const char *brokers)
+{
+    producer_info_t *producer_infos = malloc(sizeof(producer_info_t) * FINAL_NUM_PRODUCER_TYPES);
+    producer_infos[0].producer = create_producer_basic_gzip(brokers);
+    producer_infos[0].producer_name = "producer_basic_gzip";
+    producer_infos[1].producer = create_producer_ack_all_idemp_enabled_gzip(brokers);
+    producer_infos[1].producer_name = "producer_ack_all_idemp_enabled_gzip";
+    producer_infos[2].producer = create_producer_medium_vals_no_acks_no_idemp_gzip(brokers);
+    producer_infos[2].producer_name = "producer_medium_vals_no_acks_no_idemp_gzip";
+    producer_infos[3].producer = create_producer_medium_vals_all_acks_idemp_enabled_gzip(brokers);
+    producer_infos[3].producer_name = "producer_medium_vals_all_acks_idemp_enabled_gzip";
+    producer_infos[4].producer = create_producer_high_throughput_no_acks_no_idemp_gzip(brokers);
+    producer_infos[4].producer_name = "producer_high_throughput_no_acks_no_idemp_gzip";
+    producer_infos[5].producer = create_producer_high_throughput_all_acks_idemp_enabled_gzip(brokers);
+    producer_infos[5].producer_name = "producer_high_throughput_all_acks_idemp_enabled_gzip";
+
+    return producer_infos;
+}
+
 
 producer_info_t* init_new_producer_types(const char *brokers)
 {
