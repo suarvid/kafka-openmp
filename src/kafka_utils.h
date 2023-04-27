@@ -4,7 +4,7 @@
 // TODO: Try running tests with MESSAGE_SIZE cranked up to 1MB.
 #define MESSAGE_SIZE 1024 // Size of each message, in bytes
 #define MEASUREMENTS_PER_RUN 5
-#define SLEEP_BETWEEN_MEASUREMENTS 20 // seconds
+#define SLEEP_BETWEEN_MEASUREMENTS 8 // seconds // used to be 20
 
 typedef struct producer_info
 {
