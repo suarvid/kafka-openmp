@@ -7,12 +7,22 @@ broker_name = "192.168.0.131:9092/0"
 target_dir = sys.argv[1]
 producer_config = sys.argv[2]
 num_cores = sys.argv[3]
-num_producers = int(sys.argv[4])
 
-base_path_pattern = "_%s_cores_%s"
-current_path_pattern = base_path_pattern % (num_cores, producer_config)
+if producer_config == "shared":
+    num_producers = 1
+else:
+    num_producers = int(num_cores)
 
-print("Current path pattern: %s" % current_path_pattern)
+file_path_pattern = ""
+
+if len(sys.argv) == 6:
+    areas_per_msg = int(sys.argv[5])
+    file_path_pattern = "_%s_cores_%s_%s" % (num_cores, producer_config, areas_per_msg)
+else:
+    file_path_pattern = "_%s_cores_%s" % (num_cores, producer_config)
+
+print("Current file path pattern: %s" % file_path_pattern)
+print("With %d producers" % num_producers)
 
 file_count = 0
 avg_int_latency_sum = 0
@@ -21,7 +31,7 @@ txidle_sum = 0
 
 file_paths = [f for f in os.listdir(target_dir) if os.path.isfile(os.path.join(target_dir, f))]
 for path in file_paths:
-    if current_path_pattern in path:
+    if file_path_pattern in path:
         print("Processing file: %s" % path)
         with open(os.path.join(target_dir, path)) as f:
             for line in f:

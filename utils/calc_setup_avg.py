@@ -30,4 +30,4 @@ for path in file_paths:
             file_count += 1
 
 elapsed_time_avg_avg = elapsed_time_avg_sum / file_count
-print("Elapsed time avg avg: %s" % elapsed_time_avg_avg)
+print("Elapsed time avg: %s" % elapsed_time_avg_avg)
